@@ -1,0 +1,1 @@
+define(["aloha","aloha/jquery","aloha/plugin","draganddropfiles/dragndropfiles"],function(a,b,c,d){return d});

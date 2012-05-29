@@ -1,0 +1,7 @@
+/*!
+* Aloha Editor
+* Author & Copyright (c) 2010 Gentics Software GmbH
+* aloha-sales@gentics.com
+* Licensed unter the terms of http://www.aloha-editor.com/license.html
+*/
+define(["aloha/jquery","aloha/contenthandlermanager","block/blockmanager"],function(a,b,c){var d=b.createHandler({handleContent:function(b){return typeof b=="string"?b=a("<div>"+b+"</div>"):b instanceof a&&(b=a("<div>").append(b)),b.find('.aloha-block[data-aloha-block-copy-only-block="true"]').length>0&&(b.find(".aloha-block:not([id])").remove(),b.find(".aloha-block + span:empty").remove(),b.find("div:empty").remove(),b.find("br.Apple-interchange-newline").remove(),b.find(".aloha-block").prev("br").remove(),b.find("div > br:only-child").parent().remove()),b.find(".aloha-block").each(function(){var b=a(this),d={},e={};a.each(b[0].attributes,function(a,b){if(b.nodeName==="id")return;b.nodeName.match(/^data-/)?e[b.nodeName.substr(5)]=b.nodeValue:d[b.nodeName]=b.nodeValue});var f=GENTICS.Utils.guid(),g=a("<"+this.tagName+"/>").attr(d).attr("id",f).removeClass("aloha-block-active").removeClass("aloha-block").html(b.html());b.replaceWith(g),window.setTimeout(function(){c._blockify(a("#"+f),e)},50)}),b.html()}});return d});

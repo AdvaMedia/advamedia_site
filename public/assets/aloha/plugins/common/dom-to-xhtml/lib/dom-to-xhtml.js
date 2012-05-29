@@ -1,0 +1,10 @@
+/*!
+* Aloha Editor
+* Author & Copyright (c) 2010 Gentics Software GmbH
+* aloha-sales@gentics.com
+* Licensed unter the terms of http://www.aloha-editor.com/license.html
+*/
+/**
+ * Provides public utility methods to convert DOM nodes to XHTML.
+ */
+define(["aloha","aloha/jquery","aloha/console"],function(a,b,c){function d(a){var c=a.attributes,d=[];for(var e=0;e<c.length;e++){var f=c[e];if(typeof f.specified=="undefined"||f.specified){var g=f.nodeName,h="style"===g?b.attr(a,g):a.getAttribute(g);d.push([g,h])}}return d}function g(a){return a.replace(/&/g,"&amp;").replace(/</g,"&lt;")}function h(a){return g(a).replace(/"/g,"&quot;")}function i(a){var c=d(a),e="";for(var g=0;g<c.length;g++){var i=c[g][0],j=c[g][1];if(""===j||null==j)continue;i=i.toLowerCase();var k=-1!==b.inArray(i,f);if(!k||k&&j)e+=" "+i+'="'+h(""+(k?i:j))+'"'}return e}function j(a){var b="/"+a.nodeName,c=a.nextSibling;while(null!=c){if(b==c.nodeName)return!0;c=c.nextSibling}return!1}function k(a,b,c,d){while(null!=b){if(1===b.nodeType&&c&&"/"+a.nodeName==b.nodeName){b=b.nextSibling;break}1===b.nodeType&&j(b)?b=l(b,b.nextSibling,!0,d):(m(b,d),b=b.nextSibling)}return b}function l(a,c,d,f){var g=a.nodeName.toLowerCase();return a.scopeName&&"HTML"!=a.scopeName&&-1===g.indexOf(":")&&(g=a.scopeName.toLowerCase()+":"+g),!d&&null==c&&-1!==b.inArray(g,e)?f.push("<"+g+i(a)+"/>"):(f.push("<"+g+i(a)+">"),c=k(a,c,d,f),f.push("</"+g+">")),c}function m(a,b){var d=a.nodeType;1===d?l(a,a.firstChild,j(a),b):3===a.nodeType?b.push(g(a.nodeValue)):8===a.nodeType?b.push("<!--"+a.nodeValue+"-->"):c.log("Unknown node type encountered during serialization, ignoring it: type="+a.nodeType+" name="+a.nodeName+" value="+a.nodeValue)}var e=["area","base","basefont","br","col","frame","hr","img","input","isindex","link","meta","param","embed"],f=["checked","compact","declare","defer","disabled","ismap","multiple","nohref","noresize","noshade","nowrap","readonly","selected"];return{contentsToXhtml:function(a){var b=[];return k(a,a.firstChild,!1,b),b.join("")},nodeToXhtml:function(a){var b=[];return m(a,b),b.join("")}}});

@@ -1,0 +1,7 @@
+/*!
+* Aloha Editor
+* Author & Copyright (c) 2010 Gentics Software GmbH
+* aloha-sales@gentics.com
+* Licensed unter the terms of http://www.aloha-editor.com/license.html
+*/
+define(["aloha/plugin","aloha/floatingmenu","i18n!metaview/nls/i18n","i18n!aloha/nls/i18n","aloha/jquery","css!metaview/css/metaview.css"],function(a,b,c,d,e){var f=e,g=window.GENTICS,h=window.Aloha;return a.create("metaview",{_constructor:function(){this._super("metaview")},languages:["en","de"],init:function(){var a=this;this.createButtons(),h.bind("aloha-editable-activated",function(b,c){e(h.activeEditable.obj).hasClass("aloha-metaview")?a.button.setPressed(!0):a.button.setPressed(!1)})},buttonClick:function(){var a=this;e(h.activeEditable.obj).hasClass("aloha-metaview")?(e(h.activeEditable.obj).removeClass("aloha-metaview"),a.button.setPressed(!1)):(e(h.activeEditable.obj).addClass("aloha-metaview"),a.button.setPressed(!0))},createButtons:function(){var a=this;a.button=new h.ui.Button({name:"meta",iconClass:"aloha-button aloha-button-metaview",size:"small",onclick:function(){a.buttonClick()},tooltip:c.t("button.switch-metaview.tooltip"),toggle:!0}),b.addButton("Aloha.continuoustext",a.button,d.t("floatingmenu.tab.format"),1)}})});
