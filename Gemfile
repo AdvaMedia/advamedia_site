@@ -14,12 +14,14 @@ group :assets do
   gem 'coffee-rails', '~> 3.2.1'
 
   # See https://github.com/sstephenson/execjs#readme for more supported runtimes
-  # gem 'therubyracer', :platform => :ruby
+  gem 'therubyracer', :platform => :ruby
+  gem 'compass-rails', '~> 1.0.0.rc.3'
 
   gem 'uglifier', '>= 1.0.3'
 end
 
-
+gem 'locomotive_cms', :git => "git://github.com/locomotivecms/engine.git", :require => "locomotive/engine"
+gem 'unicorn', :group => 'development'
 
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'
@@ -31,7 +33,8 @@ end
 # gem 'unicorn'
 
 # Deploy with Capistrano
-# gem 'capistrano'
+gem 'capistrano'
+gem 'rvm-capistrano'
 
 # To use debugger
 # gem 'ruby-debug19', :require => 'ruby-debug'
