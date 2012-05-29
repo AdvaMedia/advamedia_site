@@ -74,7 +74,7 @@ set :repository,    "git://github.com/AdvaMedia/advamedia_site.git"
 ## dayabase.yml в shared-каталог проекта на сервере и раскомментируйте
 ## следующие строки.
 
-after "deploy:update_code", :copy_database_config
+before "deploy:finalize_update", :copy_database_config
 task :copy_database_config, roles => :app do
   db_config = "#{shared_path}/mongoid.yml"
   run "cp #{db_config} #{release_path}/config/mongoid.yml"
