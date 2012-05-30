@@ -20,6 +20,8 @@ require 'bundler/capistrano'
 # Если вы не используете assets pipelining в своем проекте,
 # или у вас старая версия rails, закомментируйте эту строку.
 #load 'deploy/assets'
+set :keep_releases, 5
+after "deploy:update", "deploy:cleanup"
 
 # Для удобства работы мы рекомендуем вам настроить авторизацию
 # SSH по ключу. При работе capistrano будет использоваться
