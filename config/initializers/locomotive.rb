@@ -5,16 +5,16 @@ Locomotive.configure do |config|
   # your own domain name (ex: locomotivehosting.com).
   #
   # Ex:
-  # config.multi_sites do |multi_sites|
-  #   # each new website you add will have a default entry based on a subdomain
-  #   # and the multi_site_domain value (ex: website_1.locomotivehosting.com).
-  #   multi_sites.domain = 'advamedia.ru' #'myhostingplatform.com'
+  config.multi_sites do |multi_sites|
+    # each new website you add will have a default entry based on a subdomain
+    # and the multi_site_domain value (ex: website_1.locomotivehosting.com).
+    multi_sites.domain = 'advamedia.saratovsource.locum.ru' #'myhostingplatform.com'
 
-  #   # define the reserved subdomains
-  #   # Ex:
-  #   multi_sites.reserved_subdomains = %w(www admin email blog webmail mail support help site sites)
-  # end
-  config.multi_sites = false
+    # define the reserved subdomains
+    # Ex:
+    multi_sites.reserved_subdomains = %w(www admin email blog webmail mail support help site sites)
+  end
+  # config.multi_sites = false
 
   # configure how many items we display in sub menu in the "Contents" section.
   # config.ui = {
