@@ -18,4 +18,4 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-define(["aloha/ext"],function(a){a.data.AlohaObjectReader=function(b,c){b={},a.applyIf(b,{idProperty:"id",root:"items",totalProperty:"results",fields:["id","url","name","type","weight","path","repositoryId"]}),a.data.JsonReader.superclass.constructor.call(this,b,b.fields)},a.extend(a.data.AlohaObjectReader,a.data.JsonReader,{})});
+define(["aloha/ext"],function(e){e.data.AlohaObjectReader=function(t,n){t={},e.applyIf(t,{idProperty:"id",root:"items",totalProperty:"results",fields:["id","url","name","type","weight","path","repositoryId"]}),e.data.JsonReader.superclass.constructor.call(this,t,t.fields)},e.extend(e.data.AlohaObjectReader,e.data.JsonReader,{})});

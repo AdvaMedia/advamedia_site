@@ -4,4 +4,4 @@
  * aloha-sales@gentics.com
  * Licensed unter the terms of http://www.aloha-editor.com/license.html
  */
-define(["aloha/registry"],function(a){return new(a.extend({createEditor:function(a){if(!this.has(a.type))throw'Editor for type "'+a.type+'" not found.';var b=this.get(a.type);return new b(a)}}))});
+define(["aloha/registry"],function(e){return new(e.extend({createEditor:function(e){if(!this.has(e.type))throw'Editor for type "'+e.type+'" not found.';var t=this.get(e.type);return new t(e)}}))});

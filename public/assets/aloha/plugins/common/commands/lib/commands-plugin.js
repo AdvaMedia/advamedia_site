@@ -4,4 +4,4 @@
 * aloha-sales@gentics.com
 * Licensed unter the terms of http://www.aloha-editor.com/license.html
 */
-define(["aloha/command","./inserthtml"],function(a,b){});
+define(["aloha/command","./inserthtml"],function(e,t){});

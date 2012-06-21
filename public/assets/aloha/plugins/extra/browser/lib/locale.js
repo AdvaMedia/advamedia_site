@@ -11,4 +11,4 @@
  * an use this value to choose which of the jgrid_* objects, Aloha.jQuery.jgrid
  * should point to
  */
-define(["aloha/jquery","i18n!browser/nls/i18n","browser/../vendor/grid.locale.en","browser/../vendor/grid.locale.de"],function(a,b){var c=b["jgrid.locale"]||"en";typeof a.jgrid=="undefined"&&(a.jgrid={}),a.extend(a.jgrid,a["jgrid_"+c]),a.jgrid_en=a.jgrid_de=void 0});
+define(["aloha/jquery","i18n!browser/nls/i18n","browser/../vendor/grid.locale.en","browser/../vendor/grid.locale.de"],function(e,t){var n=t["jgrid.locale"]||"en";typeof e.jgrid=="undefined"&&(e.jgrid={}),e.extend(e.jgrid,e["jgrid_"+n]),e.jgrid_en=e.jgrid_de=void 0});

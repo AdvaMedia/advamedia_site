@@ -4,4 +4,4 @@
 * aloha-sales@gentics.com
 * Licensed unter the terms of http://www.aloha-editor.com/license.html
 */
-define(["aloha","aloha/jquery","aloha/contenthandlermanager"],function(a,b,c){var d=window.GENTICS,e=c.createHandler({enabled:!1,handleContent:function(a){typeof a=="string"?a=b("<div>"+a+"</div>"):a instanceof b&&(a=b("<div>").append(a));if(a.find(".aloha-block").length>0)return;return this.enabled&&this.removeFormatting(a),a.html()},removeFormatting:function(a){var c=this.strippedElements;a.find(c.join(",")).each(function(){b(this).contents().unwrap()})}});return e});
+define(["aloha","aloha/jquery","aloha/contenthandlermanager"],function(e,t,n){var r=window.GENTICS,i=n.createHandler({enabled:!1,handleContent:function(e){typeof e=="string"?e=t("<div>"+e+"</div>"):e instanceof t&&(e=t("<div>").append(e));if(e.find(".aloha-block").length>0)return;return this.enabled&&this.removeFormatting(e),e.html()},removeFormatting:function(e){var n=this.strippedElements;e.find(n.join(",")).each(function(){t(this).contents().unwrap()})}});return i});
