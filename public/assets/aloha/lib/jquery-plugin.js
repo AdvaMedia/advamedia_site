@@ -19,4 +19,4 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-(function(){define({load:function(a,b,c,d){var e=b.toUrl(a+".js");b(["aloha/jquery"],function(d){var f=d;f.ajax({type:"GET",url:e,cache:!0,dataType:"text",success:function(d){d="define(['aloha/jquery'], function(jQuery) { var $ = jQuery;\n"+d+"});",c.fromText(a,d),b([a],function(a){c(a)})}})})}})})();
+(function(){define({load:function(e,t,n,r){var i=t.toUrl(e+".js");t(["aloha/jquery"],function(r){var s=r;s.ajax({type:"GET",url:i,cache:!0,dataType:"text",success:function(r){r="define(['aloha/jquery'], function(jQuery) { var $ = jQuery;\n"+r+"});",n.fromText(e,r),t([e],function(e){n(e)})}})})}})})();

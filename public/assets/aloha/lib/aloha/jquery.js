@@ -18,4 +18,4 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 // define jquery and ext modules. They need to be available in global namespace
-define("aloha/jquery",[],function(){return Aloha.jQuery.support.getSetAttribute||function(a){Aloha.jQuery.removeAttr=function(a,b){a.removeAttribute(b)}}(Aloha),Aloha.jQuery});
+define("aloha/jquery",[],function(){return Aloha.jQuery.support.getSetAttribute||function(e){Aloha.jQuery.removeAttr=function(e,t){e.removeAttribute(t)}}(Aloha),Aloha.jQuery});
