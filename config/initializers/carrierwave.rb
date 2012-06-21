@@ -19,7 +19,7 @@ CarrierWave.configure do |config|
     #}
     #config.fog_directory    = ENV['S3_BUCKET']
     config.storage = :file
-    config.root = File.join(Rails.root, 'public', "system")
+    config.root = File.join(Rails.root, 'public')
 
   else
     # settings for the local filesystem
