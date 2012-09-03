@@ -24,6 +24,7 @@ locomotive/icons/asset_switch.png: locomotive/icons/asset_switch-536aab746bb1ab5
 locomotive/icons/flags/de.png: locomotive/icons/flags/de-993e5c178e02a626ab6c01f4d7fa93aa.png
 locomotive/icons/flags/en.png: locomotive/icons/flags/en-585b8108113302f00e99227810e865f4.png
 locomotive/icons/flags/es.png: locomotive/icons/flags/es-0bcd368cb40b966aae78e5d088a20bc7.png
+locomotive/icons/flags/et.png: locomotive/icons/flags/et-7937ea039371ecabd7807c7a0846bc59.png
 locomotive/icons/flags/fr.png: locomotive/icons/flags/fr-ac8adcce1cf57ea63408982565039ed3.png
 locomotive/icons/flags/it.png: locomotive/icons/flags/it-06a8d8961aff41439a31ec3b156d26e0.png
 locomotive/icons/flags/nb.png: locomotive/icons/flags/nb-fcc46d7056f2423c4ec5619d618d0fad.png
@@ -71,10 +72,10 @@ aloha/plugins/custom/locomotive_media/lib/locomotive_media-plugin.js: aloha/plug
 aloha/plugins/custom/locomotive_media/nls/fr/i18n.js: aloha/plugins/custom/locomotive_media/nls/fr/i18n.js
 aloha/plugins/custom/locomotive_media/nls/i18n.js: aloha/plugins/custom/locomotive_media/nls/i18n.js
 aloha/plugins/custom/locomotive_media/package.json: aloha/plugins/custom/locomotive_media/package.json
-locomotive.js: locomotive-981916c1f202cbcd4769c4d374765da9.js
+locomotive.js: locomotive-fbba4a3fd283819d3d6b6493183c7711.js
 locomotive/aloha.js: locomotive/aloha-742a5dd646ef5f72dbe66f267ede2b76.js
-locomotive/application.js: locomotive/application-5f40eb16cbf4c9073cd3d30157066fa3.js
-locomotive/inline_editor.js: locomotive/inline_editor-ed72a0f43d3b9b8b08863ee24e207027.js
+locomotive/application.js: locomotive/application-7e9f1707be1e95acd6be5fcdd36d1055.js
+locomotive/inline_editor.js: locomotive/inline_editor-e88737a9912e27e5b576a66665b93b2c.js
 locomotive/not_logged_in.js: locomotive/not_logged_in-2533c2942c5be7b43e823aedc0ef8657.js
 tinymce/plugins/jqueryinlinepopups/editor_plugin.js: tinymce/plugins/jqueryinlinepopups/editor_plugin.js
 tinymce/plugins/locomotive_media/editor_plugin.js: tinymce/plugins/locomotive_media/editor_plugin.js
@@ -93,10 +94,10 @@ tinymce/themes/advanced/skins/locomotive/img/progress.gif: tinymce/themes/advanc
 tinymce/themes/advanced/skins/locomotive/img/tabs.gif: tinymce/themes/advanced/skins/locomotive/img/tabs.gif
 tinymce/themes/advanced/skins/locomotive/img/toolbarbg.png: tinymce/themes/advanced/skins/locomotive/img/toolbarbg.png
 tinymce/themes/advanced/skins/locomotive/ui.css: tinymce/themes/advanced/skins/locomotive/ui.css
-locomotive.css: locomotive-4141102131c67c9bc2e7f04abc8aa9ed.css
-locomotive/backoffice/application.css: locomotive/backoffice/application-12ef8c7ddf5600f9a1f8326981e068c3.css
-locomotive/inline_editor.css: locomotive/inline_editor-b95c32421a7d1fb50459468ee1435644.css
-locomotive/not_logged_in.css: locomotive/not_logged_in-724c180cd58223bdf7f4d5cce8f82984.css
+locomotive.css: locomotive-c020561a2007789b7f5d536af6c42271.css
+locomotive/backoffice/application.css: locomotive/backoffice/application-e2313c1fcd3b998aab81b8b8cd12b47f.css
+locomotive/inline_editor.css: locomotive/inline_editor-26beef2e1562ea1f5627df09b50fb0b1.css
+locomotive/not_logged_in.css: locomotive/not_logged_in-3c78ba0068b9a23e74f675b900f9fb45.css
 locomotive/jquery/images/ui-bg_flat_0_aaaaaa_40x100.png: locomotive/jquery/images/ui-bg_flat_0_aaaaaa_40x100-a1eb3e0764573ed4b261ca742ed96ac3.png
 locomotive/jquery/images/ui-bg_flat_75_ffffff_40x100.png: locomotive/jquery/images/ui-bg_flat_75_ffffff_40x100-841636c8f8d33987bb8d2f31e8ef92ca.png
 locomotive/jquery/images/ui-bg_glass_55_fbf9ee_1x400.png: locomotive/jquery/images/ui-bg_glass_55_fbf9ee_1x400-bbb04adbe79f471d8c88a2bc691231b6.png
