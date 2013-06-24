@@ -1,1 +1,28 @@
-define({"floatingmenu.tab.table":"Таблица","deleterows.confirm":"Вы действительно хотите удалить выбранные строки?","deletecolumns.confirm":"Вы действительно хотите удалить выбранные колонки?","deletetable.confirm":"Вы действительно хотите удалить таблицу?",Table:"Таблица","button.createtable.tooltip":"Вставить Таблицу","button.addcolleft.tooltip":"Добавить колонку слева","button.addcolright.tooltip":"Добавить колонку справа","button.delcols.tooltip":"Удалить Колонки","button.addrowbefore.tooltip":"Удалить пердыдущую строку","button.addrowafter.tooltip":"Удалть следующую строку","button.delrows.tooltip":"Удалить Строки"});
+define({
+	"floatingmenu.tab.table": "Ð¢Ð°Ð±Ð»Ð¸ÑÐ°",
+	"floatingmenu.tab.tablelayout": "Ð Ð°Ð·Ð¼ÐµÑÐºÐ° ÑÐ°Ð±Ð»Ð¸ÑÑ",
+	"deleterows.confirm": "ÐÑ Ð´ÐµÐ¹ÑÑÐ²Ð¸ÑÐµÐ»ÑÐ½Ð¾ ÑÐ¾ÑÐ¸ÑÐµ ÑÐ´Ð°Ð»Ð¸ÑÑ Ð²ÑÐ±ÑÐ°Ð½Ð½ÑÐµ ÑÑÑÐ¾ÐºÐ¸?",
+	"deletecolumns.confirm": "ÐÑ Ð´ÐµÐ¹ÑÑÐ²Ð¸ÑÐµÐ»ÑÐ½Ð¾ ÑÐ¾ÑÐ¸ÑÐµ ÑÐ´Ð°Ð»Ð¸ÑÑ Ð²ÑÐ±ÑÐ°Ð½Ð½ÑÐµ ÐºÐ¾Ð»Ð¾Ð½ÐºÐ¸?",
+	"deletetable.confirm": "ÐÑ Ð´ÐµÐ¹ÑÑÐ²Ð¸ÑÐµÐ»ÑÐ½Ð¾ ÑÐ¾ÑÐ¸ÑÐµ ÑÐ´Ð°Ð»Ð¸ÑÑ ÑÐ°Ð±Ð»Ð¸ÑÑ?",
+	"Table": "Ð¢Ð°Ð±Ð»Ð¸ÑÐ°",
+	"button.createtable.tooltip": "ÐÑÑÐ°Ð²Ð¸ÑÑ Ð¢Ð°Ð±Ð»Ð¸ÑÑ",
+	"button.addcolleft.tooltip": "ÐÐ¾Ð±Ð°Ð²Ð¸ÑÑ ÐºÐ¾Ð»Ð¾Ð½ÐºÑ ÑÐ»ÐµÐ²Ð°",
+	"button.addcolright.tooltip": "ÐÐ¾Ð±Ð°Ð²Ð¸ÑÑ ÐºÐ¾Ð»Ð¾Ð½ÐºÑ ÑÐ¿ÑÐ°Ð²Ð°",
+	"button.delcols.tooltip": "Ð£Ð´Ð°Ð»Ð¸ÑÑ ÐÐ¾Ð»Ð¾Ð½ÐºÐ¸",
+	"button.addrowbefore.tooltip": "Ð£Ð´Ð°Ð»Ð¸ÑÑ Ð¿ÐµÑÐ´ÑÐ´ÑÑÑÑ ÑÑÑÐ¾ÐºÑ",
+	"button.addrowafter.tooltip": "Ð£Ð´Ð°Ð»ÑÑ ÑÐ»ÐµÐ´ÑÑÑÑÑ ÑÑÑÐ¾ÐºÑ",
+	"button.delrows.tooltip": "Ð£Ð´Ð°Ð»Ð¸ÑÑ Ð¡ÑÑÐ¾ÐºÐ¸",
+	"button.caption.tooltip": "ÐÐ°Ð³Ð¾Ð»Ð¾Ð²Ð¾Ðº ÑÐ°Ð±Ð»Ð¸ÑÑ",
+	"empty.caption": "ÐÐ°Ð³Ð¾Ð»Ð¾Ð²Ð¾Ðº ÑÐ°Ð±Ð»Ð¸ÑÑ",
+	"button.removeFormat.tooltip": "Ð£Ð´Ð°Ð»Ð¸ÑÑ ÑÐ¾ÑÐ¼Ð°ÑÐ¸ÑÐ¾Ð²Ð°Ð½Ð¸Ðµ",
+	"button.removeFormat.text": "Ð£Ð´Ð°Ð»Ð¸ÑÑ ÑÐ¾ÑÐ¼Ð°ÑÐ¸ÑÐ¾Ð²Ð°Ð½Ð¸Ðµ",
+	"button.rowheader.tooltip": "Ð¤Ð¾ÑÐ¼Ð°ÑÐ¸ÑÐ¾Ð²Ð°ÑÑ ÑÑÑÐ¾ÐºÑ ÐºÐ°Ðº Ð·Ð°Ð³Ð¾Ð»Ð¾Ð²Ð¾Ðº ÑÐ°Ð±Ð»Ð¸ÑÑ",
+	"button.columnheader.tooltip": "Ð¤Ð¾ÑÐ¼Ð°ÑÐ¸ÑÐ¾Ð²Ð°ÑÑ ÑÑÐ¾Ð»Ð±ÐµÑ ÐºÐ°Ðº Ð·Ð°Ð³Ð¾Ð»Ð¾Ð²Ð¾Ðº ÑÐ°Ð±Ð»Ð¸ÑÑ",
+	"button.mergecells.tooltip": "ÐÐ±ÑÐµÐ´Ð¸Ð½Ð¸ÑÑ ÑÑÐµÐ¹ÐºÐ¸",
+	"button.splitcells.tooltip": "Ð Ð°Ð·Ð±Ð¸ÑÑ ÑÑÐµÐ¹ÐºÐ¸",
+	"table.label.target": "Ð ÐµÐ·ÑÐ¼Ðµ",
+	"table.sidebar.title": "Ð¢Ð°Ð±Ð»Ð¸ÑÐ°",
+	"table.mergeCells.notRectangular": "Ð¢Ð¾Ð»ÑÐºÐ¾ Ð¿ÑÑÐ¼Ð¾ÑÐ³Ð¾Ð»ÑÐ½Ð¾Ðµ Ð²ÑÐ´ÐµÐ»ÐµÐ½Ð¸Ðµ Ð¼Ð¾Ð¶ÐµÑ Ð±ÑÑÑ Ð¾Ð±ÑÐµÐ´Ð¸Ð½ÐµÐ½Ð¾",
+	"table.addColumns.nonConsecutive": "ÐÐ¾Ð¶Ð°Ð»ÑÐ¹ÑÑÐ°, Ð²ÑÐ±ÐµÑÐ¸ÑÐµ Ð¾Ð´Ð½Ñ ÐºÐ¾Ð»Ð¾Ð½ÐºÑ Ð¸Ð»Ð¸ Ð´Ð¸Ð°Ð¿Ð°Ð·Ð¾Ð½ ÐºÐ¾Ð»Ð¾Ð½Ð¾Ðº Ð¿Ð¾Ð´ÑÑÐ´",
+	"table.createTable.nestedTablesNoSupported": "ÐÐ·Ð²Ð¸Ð½Ð¸ÑÐµ, Ð²Ð»Ð¾Ð¶ÐµÐ½Ð½ÑÐµ ÑÐ°Ð±Ð»Ð¸ÑÑ Ð½Ðµ Ð¿Ð¾Ð´Ð´ÐµÑÐ¶Ð¸Ð²Ð°ÑÑÑÑ"
+});

@@ -1,1 +1,3 @@
-define({"button.formatlessPaste.tooltip":"Einfügen ohne Formatierung ein/ausschalten."});
+define({
+	"button.formatlessPaste.tooltip": "Ohne Format einfÃ¼gen de-/aktivieren"
+});

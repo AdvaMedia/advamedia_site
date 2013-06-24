@@ -1,1 +1,4 @@
-define(["aloha","aloha/jquery","aloha/plugin","draganddropfiles/dragndropfiles"],function(e,t,n,r){return r});
+define([ 'aloha', 'jquery', 'aloha/plugin', 'draganddropfiles/dragndropfiles'], 
+function ( Aloha, jQuery, Plugin, DragNDrop) {
+	return DragNDrop;
+});

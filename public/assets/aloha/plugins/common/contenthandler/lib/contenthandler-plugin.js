@@ -1,11 +1,65 @@
+/*global define: true */
+
 /*!
 * Aloha Editor
-* Author & Copyright (c) 2010 Gentics Software GmbH
+* Author & Copyright (c) 2010-2012 Gentics Software GmbH
 * aloha-sales@gentics.com
 * Licensed unter the terms of http://www.aloha-editor.com/license.html
 */
+
 /**
  * @name contenthandler
- * @namespace Content handler plugin
  */
-define(["aloha","aloha/plugin","aloha/jquery","aloha/contenthandlermanager","contenthandler/wordcontenthandler","contenthandler/genericcontenthandler","contenthandler/oembedcontenthandler","contenthandler/sanitizecontenthandler"],function(Aloha,Plugin,jQuery,ContentHandlerManager,WordContentHandler,GenericContentHandler,OembedContentHandler,SanitizeContentHandler){var ContentHandlerPlugin=Plugin.create("contenthandler",{settings:{},dependencies:[],init:function(){var that=this,handler,cc,contentHandler=["word","generic","sanitize"],i,j=contentHandler.length;for(i=0;i<j;i++)handler=contentHandler[i],cc=handler.charAt(0).toUpperCase()+handler.slice(1),ContentHandlerManager.register(handler,eval(cc+"ContentHandler"))}});return ContentHandlerPlugin});
+define([
+	'jquery',
+	'aloha/plugin',
+	'aloha/contenthandlermanager',
+	'contenthandler/wordcontenthandler',
+	'contenthandler/genericcontenthandler',
+	'contenthandler/sanitizecontenthandler',
+	'contenthandler/blockelementcontenthandler'
+], function (
+	$,
+	Plugin,
+	ContentHandlerManager,
+	WordContentHandler,
+	GenericContentHandler,
+	SanitizeContentHandler,
+	BlockelementContentHandler
+) {
+	'use strict';
+
+	/**
+	 * The default content handlers which will always be loaded with Aloha
+	 * when the contenthandler plugin is initialized.
+	 *
+	 * @object<string, ContentHandler>
+	 * @const
+	 */
+	var DEFAULT_HANDLERS = {
+		word: WordContentHandler,
+		generic: GenericContentHandler,
+		sanitize: SanitizeContentHandler,
+		blockelement: BlockelementContentHandler
+	};
+
+	var ContentHandler = Plugin.create('contenthandler', {
+
+		/**
+		 * Will simply register the default content handlers.
+		 *
+		 * @override
+		 */
+		init: function () {
+			var handler;
+			for (handler in DEFAULT_HANDLERS) {
+				if (DEFAULT_HANDLERS.hasOwnProperty(handler)) {
+					ContentHandlerManager.register(handler,
+							DEFAULT_HANDLERS[handler]);
+				}
+			}
+		}
+	});
+
+	return ContentHandler;
+});

@@ -1,7 +1,1596 @@
-/*!
-* Aloha Editor
-* Author & Copyright (c) 2010 Gentics Software GmbH
-* aloha-sales@gentics.com - way to over-lawyer it up Andrew :/
-* Licensed unter the terms of http://www.aloha-editor.com/license.html
-*/
-define(["aloha","aloha/jquery","aloha/plugin","aloha/pluginmanager","aloha/floatingmenu","i18n!table/nls/i18n","i18n!aloha/nls/i18n","table/table-create-layer","table/table","table/table-plugin-utils","css!table/css/table.css"],function(e,t,n,r,i,s,o,u,a,f){function p(){var e=[],n=h;return t.each(arguments,function(){e.push("."+(this==""?n:n+"-"+this))}),e.join(" ").trim()}function d(){var e=[],n=h;return t.each(arguments,function(){e.push(this==""?n:n+"-"+this)}),e.join(" ").trim()}function v(e,n){var r=e.endContainer,i=e.startContainer,s=r.nodeType==3?r.length:r.childNodes.length;i.nodeType==3&&i.parentNode.tagName=="P"&&i.parentNode.childNodes.length==1&&/^(\s|%A0)$/.test(escape(i.data))&&(i.data="",e.startOffset=0,r==i&&(e.endOffset=0)),l.Utils.Dom.allowsNesting(i.nodeType==3?i.parentNode:i,n)||(e.startOffset==0&&t(i.nodeType==3?i.parentNode:i).addClass("aloha-table-cleanme"),e.endOffset==s&&t(r.nodeType==3?r.parentNode:r).addClass("aloha-table-cleanme"))}function m(){var e=t(".aloha-table-cleanme").removeClass("aloha-table-cleanme");for(var n=0;n<e.length;n++)t.trim(t(e[n]).html())==""&&!l.Utils.Dom.isEditingHost(e[n])&&t(e[n]).remove()}var l=window.GENTICS,c=new n("table");c.createLayer=undefined,c.languages=["en","de","fr","eo","fi","ru","it","pl"],c.config=["table"],c.TableRegistry=new Array,c.activeTable=undefined,c.parameters={className:"aloha-table",classSelectionRow:"aloha-table-selectcolumn",classSelectionColumn:"aloha-table-selectrow",classLeftUpperCorner:"aloha-table-leftuppercorner",classTableWrapper:"aloha-table-wrapper",classCellSelected:"aloha-cell-selected",waiRed:"aloha-wai-red",waiGreen:"aloha-wai-green",selectionArea:10},c.checkConfig=function(e){if(typeof e=="object"&&e.length){var t=[];for(var n=0;n<e.length;n++)e[n]&&t.push({text:e[n].text?e[n].text:e[n].name,tooltip:e[n].tooltip?e[n].tooltip:e[n].text,iconClass:e[n].iconClass?e[n].iconClass:"aloha-button-"+e[n].name,cssClass:e[n].cssClass?e[n].cssClass:e[n].name});e=t}else e=[];return e},c.init=function(){this.tableConfig=this.checkConfig(this.tableConfig||this.settings.tableConfig),this.columnConfig=this.checkConfig(this.columnConfig||this.settings.columnConfig),this.rowConfig=this.checkConfig(this.rowConfig||this.settings.rowConfig),this.createLayer=new u(this);var n=this;e.bind("aloha-editable-created",function(e,t){t.obj.bind("mousedown",function(e){c.setFocusedTable(undefined)}),t.obj.find("table").each(function(){if(n.isEditableTable(this)&&!c.isWithinTable(this)){var e=new a(this,c);e.parentEditable=t,c.TableRegistry.push(e)}c.checkForNestedTables(t.obj)})}),this.initTableButtons(),e.bind("aloha-table-selection-changed",function(){null!=c.activeTable&&0!==c.activeTable.selection.selectedCells.length&&c.updateFloatingMenuScope(),typeof c.activeTable!="undefined"&&c.activeTable.selection&&(c.activeTable.selection.cellsAreSplitable()?(n.btnSplitcells.enable(),n.btnRowsplitcells.enable(),n.btnTablesplitcells.enable()):(n.btnSplitcells.disable(),n.btnRowsplitcells.disable(),n.btnTablesplitcells.disable()),c.activeTable.selection.cellsAreMergeable()?(n.btnMergecells.enable(),n.btnRowmergecells.enable(),n.btnTablemergecells.enable()):(n.btnMergecells.disable(),n.btnRowmergecells.disable(),n.btnTablemergecells.disable()))}),e.bind("aloha-selection-changed",function(r,s){if(null==s.startContainer)return;if(e.activeEditable){var o=n.getEditableConfig(e.activeEditable.obj);t.inArray("table",o)!=-1&&e.Selection.mayInsertTag("table")?n.createTableButton.show():n.createTableButton.hide();var u=s.findMarkup(function(){return this.nodeName.toLowerCase()=="table"},e.activeEditable.obj);n.activeTable&&(u?c.updateFloatingMenuScope():(n.activeTable.selection.cellSelectionMode=!1,n.activeTable.selection.baseCellPosition=null,n.activeTable.selection.lastSelectionRange=null,n.activeTable.focusOut())),i.doLayout()}}),e.bind("aloha-editable-activated",function(e,r){n.btnSplitcells.disable(),n.btnRowsplitcells.disable(),n.btnTablesplitcells.disable(),n.btnMergecells.disable(),n.btnRowmergecells.disable(),n.btnTablemergecells.disable(),r.editable.obj.find("table").each(function(){var e=c.TableRegistry;for(var i=0;i<e.length;i++)if(e[i].obj.attr("id")==t(this).attr("id"))return e[i].activate(),!0;if(n.isEditableTable(this)&&!c.isWithinTable(this)){var s=new a(this,c);s.parentEditable=r.editable,s.activate(),c.TableRegistry.push(s)}c.checkForNestedTables(r.editable.obj)})}),e.bind("aloha-editable-deactivated",function(e,t){c.activeTable&&c.activeTable.selection.unselectCells(),c.setFocusedTable(undefined);var n=c.TableRegistry;for(var r=0;r<n.length;r++)n[r].deactivate()}),e.bind("aloha-smart-content-changed",function(t){e.activeEditable&&e.activeEditable.obj.find("table").each(function(){if(c.indexOfTableInRegistry(this)==-1&&!c.isWithinTable(this)){this.id=l.Utils.guid();var t=new a(this,c);t.parentEditable=e.activeEditable,c.TableRegistry.push(t),t.activate()}c.checkForNestedTables(e.activeEditable.obj)})}),this.settings.summaryinsidebar&&e.ready(function(){n.initSidebar(e.Sidebar.right.show())})};var h="aloha-table";return c.initSidebar=function(e){var n=this;n.sidebar=e,e.addPanel({id:d("sidebar-panel"),title:s.t("table.sidebar.title"),content:"",expanded:!0,activeOn:"table",onInit:function(){var e=this,r=this.setContent('<label class="'+d("label")+'" for="'+d("textarea")+'" >'+s.t("table.label.target")+"</label>"+'<textarea id="'+d("textarea")+'" class="'+d("textarea")+'" />').content;t(p("textarea")).live("keyup",function(){t(e.effective).attr("summary",t(p("textarea")).val());var r=t('div[class*="wai"]',"table#"+t(e.effective).attr("id"));r.removeClass(n.get("waiGreen")),r.removeClass(n.get("waiRed")),t(p("textarea")).val().trim()!=""?r.addClass(n.get("waiGreen")):r.addClass(n.get("waiRed"))})},onActivate:function(e){var n=this;n.effective=e,t(p("textarea")).val(t(n.effective).attr("summary"))}}),e.show()},c.isEditableTable=function(e){return l.Utils.Dom.isEditable(e)},c.indexOfTableInRegistry=function(e){var t=this.TableRegistry;for(var n=0;n<t.length;n++)if(t[n].obj[0].id==e.id)return n;return-1},c.getTableFromRegistry=function(e){var t=this.indexOfTableInRegistry(e);return t>-1?this.TableRegistry[t]:null},c.isSelectionInTable=function(){var n=e.Selection.getRangeObject(),r=t(n.commonAncestorContainer);return r.length==0?!1:r.parents(".aloha-editable table").length?!0:!1},c.preventNestedTables=function(){return this.isSelectionInTable()?(e.showMessage(new e.Message({title:s.t("Table"),text:s.t("table.createTable.nestedTablesNoSupported"),type:e.Message.Type.ALERT})),!0):!1},c.isWithinTable=function(e){return t(e).parents(".aloha-editable table").length>0},c.checkForNestedTables=function(e){e.find("table table").length},c.initRowsBtns=function(){var n=this;i.addButton(this.name+".row",new e.ui.Button({name:"addrowbefore",iconClass:"aloha-button aloha-button-addRowBefore",size:"small",tooltip:s.t("button.addrowbefore.tooltip"),onclick:function(){n.activeTable&&n.activeTable.addRowBeforeSelection()}}),s.t("floatingmenu.tab.table"),1),i.addButton(this.name+".row",new e.ui.Button({name:"addrowafter",iconClass:"aloha-button aloha-button-addRowAfter",size:"small",tooltip:s.t("button.addrowafter.tooltip"),onclick:function(){n.activeTable&&n.activeTable.addRowAfterSelection()}}),s.t("floatingmenu.tab.table"),1),i.addButton(this.name+".row",new e.ui.Button({name:"deleterow",iconClass:"aloha-button aloha-button-deleteRows",size:"small",tooltip:s.t("button.delrows.tooltip"),onclick:function(){if(n.activeTable){var t=n.activeTable;e.showMessage(new e.Message({title:s.t("Table"),text:s.t("deleterows.confirm"),type:e.Message.Type.CONFIRM,callback:function(e){e=="yes"&&t.deleteRows()}}))}}}),s.t("floatingmenu.tab.table"),1),this.rowHeader=new e.ui.Button({name:"rowheader",iconClass:"aloha-button aloha-button-row-header",size:"small",tooltip:s.t("button.rowheader.tooltip"),toggle:!0,onclick:function(){if(n.activeTable){var r=n.activeTable.selection.selectedCells;n.rowsToSelect=[];var i=r[0]&&r[0].nodeName.toLowerCase()=="td"&&r.length==1||r[0]&&r[0].nodeName.toLowerCase()=="td"&&r[1].nodeName.toLowerCase()=="td";for(var s=0;s<r.length;s++)s==0&&n.rowsToSelect.push(r[s].rowIndex),i?r[s]=e.Markup.transformDomObject(r[s],"th").attr("scope","col")[0]:r[s]=e.Markup.transformDomObject(r[s],"td").removeAttr("scope")[0],t(r[s]).bind("mousedown",function(e){var r=t(this).children("div").eq(0);setTimeout(function(){r.trigger("focus")},1),n.activeTable&&n.activeTable.selection.unselectCells()});n.activeTable&&(n.activeTable.refresh(),n.activeTable.selectRows())}}}),i.addButton(this.name+".row",this.rowHeader,s.t("floatingmenu.tab.table"),1),this.btnRowmergecells=new e.ui.Button({name:"rowmergecells",iconClass:"aloha-button aloha-button-merge-cells",size:"small",tooltip:s.t("button.mergecells.tooltip"),toggle:!1,onclick:function(){n.activeTable&&n.activeTable.selection.mergeCells()}}),i.addButton(this.name+".row",this.btnRowmergecells,s.t("floatingmenu.tab.table"),1),this.btnRowsplitcells=new e.ui.Button({name:"rowsplitcells",iconClass:"aloha-button aloha-button-split-cells",size:"small",tooltip:s.t("button.splitcells.tooltip"),toggle:!1,onclick:function(){n.activeTable&&n.activeTable.selection.splitCells()}}),i.addButton(this.name+".row",this.btnRowsplitcells,s.t("floatingmenu.tab.table"),1),this.rowMSItems=[],t.each(this.rowConfig,function(e,r){n.rowMSItems.push({name:r.name,text:s.t(r.text),tooltip:s.t(r.tooltip),iconClass:"aloha-button aloha-row-layout "+r.iconClass,click:function(){if(n.activeTable){var e=n.activeTable.selection.selectedCells;for(var i=0;i<e.length;i++)if(t(e[i]).attr("class").indexOf(r.cssClass)>-1)t(e[i]).removeClass(r.cssClass);else{t(e[i]).addClass(r.cssClass);for(var s=0;s<n.rowConfig.length;s++)n.rowConfig[s].cssClass!=r.cssClass&&t(e[i]).removeClass(n.rowConfig[s].cssClass)}n.activeTable.selectRows()}}})}),this.rowMSItems.length>0&&this.rowMSItems.push({name:"removeFormat",text:s.t("button.removeFormat.text"),tooltip:s.t("button.removeFormat.tooltip"),iconClass:"aloha-button aloha-button-removeFormat",wide:!0,click:function(){if(n.activeTable){var e=n.activeTable.selection.selectedCells;for(var r=0;r<e.length;r++)for(var i=0;i<n.rowConfig.length;i++)t(e[r]).removeClass(n.rowConfig[i].cssClass);n.activeTable.selectRows()}}}),this.rowMSButton=new e.ui.MultiSplitButton({items:this.rowMSItems,name:"tableRowActions"}),this.rowMSItems.length>0&&i.addButton(this.name+".row",this.rowMSButton,s.t("floatingmenu.tab.table"),3)},c.initColumnBtns=function(){var n=this;i.addButton(this.name+".column",new e.ui.Button({name:"addcolumnleft",iconClass:"aloha-button aloha-button-addColumnLeft",size:"small",tooltip:s.t("button.addcolleft.tooltip"),onclick:function(){n.activeTable&&n.activeTable.addColumnsLeft()}}),s.t("floatingmenu.tab.table"),1),i.addButton(this.name+".column",new e.ui.Button({name:"addcolumnright",iconClass:"aloha-button aloha-button-addColumnRight",size:"small",tooltip:s.t("button.addcolright.tooltip"),onclick:function(){n.activeTable&&n.activeTable.addColumnsRight()}}),s.t("floatingmenu.tab.table"),1),i.addButton(this.name+".column",new e.ui.Button({name:"deletecolumns",iconClass:"aloha-button aloha-button-deleteColumns",size:"small",tooltip:s.t("button.delcols.tooltip"),onclick:function(){if(n.activeTable){var t=n.activeTable;e.showMessage(new e.Message({title:s.t("Table"),text:s.t("deletecolumns.confirm"),type:e.Message.Type.CONFIRM,callback:function(e){e=="yes"&&t.deleteColumns()}}))}}}),s.t("floatingmenu.tab.table"),1),this.columnHeader=new e.ui.Button({name:"columnheader",iconClass:"aloha-button aloha-button-col-header",size:"small",tooltip:s.t("button.columnheader.tooltip"),toggle:!0,onclick:function(){if(n.activeTable){var r=n.activeTable.selection.selectedColumnIdxs,i,s=n.activeTable.selection.isHeader();for(var o=0;o<n.activeTable.selection.selectedCells.length;o++)i=n.activeTable.selection.selectedCells[o],s?i=e.Markup.transformDomObject(i,"td").removeAttr("scope").get(0):i=e.Markup.transformDomObject(i,"th").attr("scope","row").get(0),t(n.activeTable.selection.selectedCells[o]).bind("mousedown",function(e){var n=t(this).children("div").eq(0);setTimeout(function(){n.trigger("focus")},1)});n.activeTable.refresh(),n.activeTable.selection.unselectCells(),n.activeTable.selection.selectColumns(r)}}}),i.addButton(this.name+".column",this.columnHeader,s.t("floatingmenu.tab.table"),1),this.btnTablemergecells=new e.ui.Button({name:"tablemergecells",iconClass:"aloha-button aloha-button-merge-cells",size:"small",tooltip:s.t("button.mergecells.tooltip"),toggle:!1,onclick:function(){n.activeTable&&n.activeTable.selection.mergeCells()}}),i.addButton(this.name+".column",this.btnTablemergecells,s.t("floatingmenu.tab.table"),1),this.btnTablesplitcells=new e.ui.Button({name:"tablesplitcells",iconClass:"aloha-button aloha-button-split-cells",size:"small",tooltip:s.t("button.splitcells.tooltip"),toggle:!1,onclick:function(){n.activeTable&&n.activeTable.selection.splitCells()}}),i.addButton(this.name+".column",this.btnTablesplitcells,s.t("floatingmenu.tab.table"),1),this.columnMSItems=[],t.each(this.columnConfig,function(e,r){var i={name:r.name,text:s.t(r.text),tooltip:s.t(r.tooltip),iconClass:"aloha-button aloha-column-layout "+r.iconClass,click:function(e,i,s){if(n.activeTable){var o=n.activeTable.selection.selectedCells;for(var u=0;u<o.length;u++)if(t(o[u]).attr("class").indexOf(r.cssClass)>-1)t(o[u]).removeClass(r.cssClass);else{t(o[u]).addClass(r.cssClass);for(var a=0;a<n.columnConfig.length;a++)n.columnConfig[a].cssClass!=r.cssClass&&t(o[u]).removeClass(n.columnConfig[a].cssClass)}n.activeTable.selectColumns()}}};n.columnMSItems.push(i)}),this.columnMSItems.length>0&&this.columnMSItems.push({name:"removeFormat",text:s.t("button.removeFormat.text"),tooltip:s.t("button.removeFormat.tooltip"),iconClass:"aloha-button aloha-button-removeFormat",wide:!0,click:function(){if(n.activeTable){var e=n.activeTable.selection.selectedCells;for(var r=0;r<e.length;r++)for(var i=0;i<n.columnConfig.length;i++)t(e[r]).removeClass(n.columnConfig[i].cssClass);n.activeTable.selectColumns()}}}),this.columnMSButton=new e.ui.MultiSplitButton({items:this.columnMSItems,name:"tableColumnActions"}),this.columnMSItems.length>0&&i.addButton(this.name+".column",this.columnMSButton,s.t("floatingmenu.tab.table"),3)},c.initTableButtons=function(){var n=this;i.createScope(this.name+".row","Aloha.global"),i.createScope(this.name+".column","Aloha.global"),i.createScope(this.name+".cell","Aloha.continuoustext"),this.createTableButton=new e.ui.Button({name:"table",iconClass:"aloha-button aloha-button-table",size:"small",tooltip:s.t("button.createtable.tooltip"),onclick:function(e,t){c.createDialog(e.btnEl.dom)}}),i.addButton("Aloha.continuoustext",this.createTableButton,o.t("floatingmenu.tab.insert"),1),this.initColumnBtns(),this.initRowsBtns(),this.tableMSItems=[];var r=this.tableConfig;t.each(r,function(e,t){n.tableMSItems.push({name:t.name,text:s.t(t.text),tooltip:s.t(t.tooltip),iconClass:"aloha-button aloha-table-layout "+t.iconClass,click:function(){if(n.activeTable){for(var e=0;e<r.length;e++)n.activeTable.obj.removeClass(r[e].cssClass);n.activeTable.obj.addClass(t.cssClass)}}})}),this.tableMSItems.length>0&&this.tableMSItems.push({name:"removeFormat",text:s.t("button.removeFormat.text"),tooltip:s.t("button.removeFormat.tooltip"),iconClass:"aloha-button aloha-button-removeFormat",wide:!0,click:function(){if(n.activeTable)for(var e=0;e<r.length;e++)n.activeTable.obj.removeClass(n.tableConfig[e].cssClass)}}),this.tableMSButton=new e.ui.MultiSplitButton({items:this.tableMSItems,name:"tableActions"}),this.tableMSItems.length>0&&i.addButton(this.name+".cell",this.tableMSButton,s.t("floatingmenu.tab.tablelayout"),3),this.btnMergecells=new e.ui.Button({name:"mergecells",iconClass:"aloha-button aloha-button-merge-cells",size:"small",tooltip:s.t("button.mergecells.tooltip"),toggle:!1,onclick:function(){n.activeTable&&n.activeTable.selection.mergeCells()}}),i.addButton(this.name+".cell",this.btnMergecells,s.t("floatingmenu.tab.table"),1),this.btnSplitcells=new e.ui.Button({name:"splitcells",iconClass:"aloha-button aloha-button-split-cells",size:"small",tooltip:s.t("button.splitcells.tooltip"),toggle:!1,onclick:function(){n.activeTable&&n.activeTable.selection.splitCells()}}),i.addButton(this.name+".cell",this.btnSplitcells,s.t("floatingmenu.tab.table"),1),this.captionButton=new e.ui.Button({name:"tablecaption",iconClass:"aloha-button aloha-button-table-caption",size:"small",tooltip:s.t("button.caption.tooltip"),toggle:!0,onclick:function(){if(n.activeTable)if(n.activeTable.obj.children("caption").is("caption"))n.activeTable.obj.children("caption").remove();else{var r=s.t("empty.caption"),i=t("<caption></caption>");n.activeTable.obj.append(i),n.makeCaptionEditable(i,r);var o=i.find("div").eq(0),u=o.contents().eq(0);if(u.length>0){var a=new l.Utils.RangeObject;a.startContainer=a.endContainer=u.get(0),a.startOffset=0,a.endOffset=u.text().length,n.activeTable.obj.find("div.aloha-table-cell-editable").blur(),o.focus(),a.select(),e.Selection.updateSelection()}}}}),i.addButton(this.name+".cell",this.captionButton,s.t("floatingmenu.tab.table"),1),this.summary=new e.ui.AttributeField({width:275,name:"tableSummary"}),this.summary.addListener("keyup",function(e,t){n.activeTable.checkWai()}),this.settings.summaryinsidebar||i.addButton(this.name+".cell",this.summary,s.t("floatingmenu.tab.table"),1)},c.makeCaptionEditable=function(e,n){var r=this,i=e.children("div").eq(0);i.length==0&&(i=t("<div></div>"),t(i).addClass("aloha-ui"),t(i).addClass("aloha-editable-caption"),e.contents().length>0?e.contents().wrap(i):(n&&i.text(n),e.append(i))),i.contentEditable(!0),i.unbind("mousedown"),i.bind("mousedown",function(e){return i.focus(),e.preventDefault(),e.stopPropagation(),!1})},c.createDialog=function(e){this.createLayer.set("target",e),this.createLayer.show()},c.createTable=function(n,r){if(this.preventNestedTables())return;if(e.activeEditable&&typeof e.activeEditable.obj!="undefined"){var i=document.createElement("table"),s=i.id=l.Utils.guid(),o=document.createElement("tbody");for(var u=0;u<r;u++){var f=document.createElement("tr");for(var h=0;h<n;h++){var p=document.createTextNode(" "),d=document.createElement("td");d.appendChild(p),f.appendChild(d)}o.appendChild(f)}i.appendChild(o),v(e.Selection.getRangeObject(),i),l.Utils.Dom.insertIntoDOM(t(i),e.Selection.getRangeObject(),e.activeEditable.obj),m();var g=document.getElementById(s);if(!c.isWithinTable(g)){var y=new a(g,c);y.parentEditable=e.activeEditable,y.activate(),t.browser.msie?window.setTimeout(function(){y.cells[0].wrapper.get(0).focus()},20):y.cells[0].wrapper.get(0).focus(),c.TableRegistry.push(y)}c.checkForNestedTables(e.activeEditable.obj)}else this.error("There is no active Editable where the table can be				inserted!")},c.setFocusedTable=function(e){var t=this;null==e&&null!=this.activeTable&&this.activeTable.selection.unselectCells();for(var n=0;n<c.TableRegistry.length;n++)c.TableRegistry[n].hasFocus=!1;if(typeof e!="undefined"){this.summary.setTargetObject(e.obj,"summary");if(e.obj.children("caption").is("caption")){t.captionButton.setPressed(!0);var r=e.obj.children("caption");t.makeCaptionEditable(r)}e.hasFocus=!0}c.activeTable=e;if(this.tableMSButton.extButton){for(var n=0;n<this.tableMSItems.length;n++)this.tableMSButton.showItem(this.tableMSItems[n].name);this.tableMSButton.setActiveItem()}if(this.activeTable)for(var n=0;n<this.tableConfig.length;n++)this.activeTable.obj.hasClass(this.tableConfig[n].cssClass)&&this.tableMSButton.setActiveItem(this.tableConfig[n].name)},c.error=function(t){e.Log.error(this,t)},c.debug=function(t){e.Log.debug(this,t)},c.info=function(t){e.Log.info(this,t)},c.log=function(t){e.log("log",this,t)},c.get=function(e){return this.config[e]?this.config[e]:this.parameters[e]?this.parameters[e]:undefined},c.set=function(e,t){this.config[e]?this.config[e]=t:this.parameters[e]=t},c.makeClean=function(e){var t=this;e.find("table").each(function(){t.getTableFromRegistry(this)&&(new a(this,t)).deactivate()})},c.toString=function(){return this.prefix},c.updateFloatingMenuScope=function(){null!=c.activeTable&&null!=c.activeTable.selection.selectionType&&i.setScope(c.name+"."+c.activeTable.selection.selectionType)},r.register(c),c});
+/* table-plugin.js is part of Aloha Editor project http://aloha-editor.org
+ *
+ * Aloha Editor is a WYSIWYG HTML5 inline editing library and editor.
+ * Copyright (c) 2010-2013 Gentics Software GmbH, Vienna, Austria.
+ * Contributors http://aloha-editor.org/contribution.php
+ *
+ * Aloha Editor is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or any later version.
+ *
+ * Aloha Editor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
+ * As an additional permission to the GNU GPL version 2, you may distribute
+ * non-source (e.g., minimized or compacted) forms of the Aloha-Editor
+ * source code without the copy of the GNU GPL normally required,
+ * provided you include this license notice and a URL through which
+ * recipients can access the Corresponding Source.
+ */
+define([
+	'aloha',
+	'jquery',
+	'aloha/plugin',
+	'aloha/pluginmanager',
+	'ui/ui',
+	'ui/scopes',
+	'ui/button',
+	'ui/toggleButton',
+	'ui/dialog',
+	'ui/port-helper-attribute-field',
+	'ui/port-helper-multi-split',
+	'i18n!table/nls/i18n',
+	'i18n!aloha/nls/i18n',
+	'table/table-create-layer',
+	'table/table',
+	'table/table-plugin-utils',
+	'util/dom',
+	'aloha/console'
+], function(
+	Aloha,
+	jQuery,
+	Plugin,
+	PluginManager,
+	Ui,
+	Scopes,
+	Button,
+	ToggleButton,
+	Dialog,
+	AttributeField,
+	MultiSplitButton,
+	i18n,
+	i18nCore,
+	CreateLayer,
+	Table,
+	Utils,
+	Dom,
+	Console
+) {
+	var $ = jQuery;
+	var GENTICS = window.GENTICS;
+
+	/**
+	 * Register the TablePlugin as Aloha.Plugin
+	 */
+	var TablePlugin = new Plugin('table');
+
+	/**
+	 * The Create-Layer Object of the TablePlugin
+	 *
+	 * @see Table.CreateLayer
+	 */
+	TablePlugin.createLayer = undefined;
+
+	/**
+	 * default button configuration
+	 */
+	TablePlugin.config = [ 'table' ];
+
+	/**
+	 * An Array which holds all newly created tables contains DOM-Nodes of
+	 * table-objects
+	 */
+	TablePlugin.TableRegistry = new Array();
+
+	/**
+	 * Holds the active table-object
+	 */
+	TablePlugin.activeTable = undefined;
+
+	/**
+	 * parameters-objects for tables
+	 *
+	 * @param className
+	 *            The class of activated tables
+	 */
+	TablePlugin.parameters = {
+		className            : 'aloha-table',                 // class of editable tables
+		classSelectionRow    : 'aloha-table-selectcolumn',    // class for the upper table-row to select columns
+		classSelectionColumn : 'aloha-table-selectrow',       // class for the left bound table-cells to select rows
+		classLeftUpperCorner : 'aloha-table-leftuppercorner', // class for the left upper corner cell
+		classTableWrapper    : 'aloha-table-wrapper',         // class of the outest table-wrapping div
+		classCellSelected    : 'aloha-cell-selected',         // class of cell which are selected (row/column selection)
+		waiRed               : 'aloha-wai-red',               // class that shows wai of div
+		waiGreen             : 'aloha-wai-green',             // class that shows wai of div
+		selectionArea        : 10                             // width/height of the selection rows (in pixel)
+	};
+
+	/**
+	 * @hide
+	 * {name:'green', text:'Green',tooltip:'Green',iconClass:'GENTICS_table GENTICS_button_green',cssClass:'green'}
+	 */
+	TablePlugin.checkConfig = function (c){
+		if (typeof c == 'object' && c.length) {
+			var newC = [];
+
+			for (var i = 0; i < c.length; i++) {
+				if (c[i]) {
+					newC.push({
+						name      : c[i].name,
+						text	  : c[i].text	   ? c[i].text		: c[i].name,
+						tooltip	  : c[i].tooltip   ? c[i].tooltip	: c[i].text,
+						iconClass : c[i].iconClass ? c[i].iconClass	: 'aloha-icon-' + c[i].name,
+						cssClass  : c[i].cssClass  ? c[i].cssClass	: c[i].name
+					});
+				}
+			}
+
+			c = newC;
+		} else {
+			c = [];
+		}
+
+		return c;
+	};
+
+	/**
+	 * Checks whether the given DOM element is nested within a table.
+	 *
+	 * @param {jQuery.<HTMLElement>} $element
+	 * @return {boolean} True if the given element is nested in a table.
+	 */
+	function isWithinTable($element) {
+		return 0 < $element.parents('.aloha-editable table').length;
+	}
+
+	/**
+	 * Checks whether the given DOM element is nested within an aloha block.
+	 *
+	 * @param {jQuery.<HTMLElement>} $element
+	 * @return {boolean} True if the given element is nested in an aloha block.
+	 */
+	function isWithinBlock($element) {
+		var i;
+		var $node;
+		var $parents = $element.parents();
+		for (i = 0; i < $parents.length; i++) {
+			$node = $parents.eq(i);
+			if ($node.is('.aloha-editable')) {
+				return false;
+			}
+			if ($node.is('.aloha-block')) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Checks whether the table is an editable element.
+	 *
+	 * @return {boolean} True if the table's parent element is contentEditable;
+	 *                   false otherwise.
+	 */
+	function isEditableTable(table) {
+		return GENTICS.Utils.Dom.isEditable(table);
+	}
+
+	/**
+	 * Checks for the presence of nested tables in the given element.
+	 *
+	 * @param {jQuery.<HTMLElement>} $element jQuery unit set containing a DOM
+	 *                                        element.
+	 * @return {boolean} True if nested tables were detected; false otherwise.
+	 */
+	function checkForNestedTables($element) {
+		var selector = $element.is('table') ? 'table' : 'table table';
+		if ($element.find(selector).length) {
+			Console.warn('Table Plugin',
+					'Nested tables found. They will not be initialized.');
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Creates a table, if it is allowed, and registers a new Table object for
+	 * the given table DOM element.
+	 *
+	 * If the table's editable parent is activated, the table will also
+	 * automatically be activated.
+	 *
+	 * @param {HTMLElement} element HTML table element.
+	 * @return {Table|null} The created Table object or null if it was not
+	 *                      allowed to create the table.
+	 */
+	function createNewTable(element) {
+		var $table = $(element);
+		var create = isEditableTable(element)
+		          && !isWithinTable($table)
+		          && !isWithinBlock($table);
+		if (create) {
+			var table = new Table(element, TablePlugin);
+			var $host = $(Dom.getEditingHostOf(element));
+			table.parentEditable = Aloha.getEditableById($host.attr('id'));
+			TablePlugin.TableRegistry.push(table);
+			checkForNestedTables($table);
+			if (Aloha.activeEditable === table.parentEditable) {
+				table.activate();
+			}
+			return table;
+		}
+		return null;
+	}
+
+	/**
+	 * Sets the currently selected elements as headers of the table, or removes header-status
+	 * if the whole selection is already used as a header
+	 *
+	 * @param {Aloha.Table} table the table-object for which the headers are to be set
+	 * @param {string} scope for which the header should be used (i.e. 'row' or 'column')
+	 */
+	function toggleHeaderStatus(table, scope) {
+		var	i,
+			j,
+			allHeaders = table.selection.isHeader(),
+			domCell, // representation of the cell in the dom
+			tableCell, // table-cell object
+			bufferCell; // temporary buffer
+
+		for (i = 0; i < table.selection.selectedCells.length; i++) {
+			domCell = table.selection.selectedCells[i];
+
+			// tries to match the current cell with a cell-object in the table
+			for (j = 0; j < table.cells.length; j++) {
+				if (domCell === table.cells[j].obj[0]) {
+					cell = table.cells[j];
+					break;
+				}
+			}
+
+			// the transformed dom objects are first stored in a buffer, and only applied to
+			// the table-cell-object if a match was found
+			if (allHeaders) {
+				bufferCell = Aloha.Markup.transformDomObject(domCell, 'td').removeAttr('scope').get(0);
+			} else {
+				bufferCell = Aloha.Markup.transformDomObject(domCell, 'th').attr('scope', scope).get(0);
+			}
+
+			if (cell != null) {
+				// assign the changed dom-element to the table-cell
+				cell.obj[0] = bufferCell;
+
+				// reactivate the table cell in order to bind events to the changed dom object
+				// TODO: re-attaching event-handlers should be factored out into a utility function
+				// so we don't have to do the whole activation/deactivation process for the cells
+				cell.deactivate();
+				cell.activate();
+			}
+
+			// uncommented code-segment, presumably added to force IE to target the wrapper
+			// on mouse-down by applying a timeout after event propagation
+			jQuery(table.selection.selectedCells[i]).bind('mousedown', function (jqEvent) {
+				var wrapper = jQuery(this).children('div').eq(0);
+				window.setTimeout(function () {
+					wrapper.trigger( 'focus' );
+				}, 1);
+			});
+		}
+	}
+
+	/**
+	 * If the specified style is not already active in all selected cells, it is applied;
+	 * otherwise, it is removed from the cells
+	 *
+	 * @param {Array} config defined styles as defined in the configuration
+	 * @param {String} cssClass
+	 * @param {Array} sc the selection of target table cells
+	 */
+	function applyStyle(config, cssClass, sc) {
+		var appliedToAll = true;
+
+		for (var i = 0; i < sc.length; i++) {
+			if (jQuery(sc[i]).attr('class').indexOf(cssClass) < 0 ) {
+				appliedToAll = false;
+				break;
+			}
+		}
+
+		if (!appliedToAll) {
+			for (var i = 0; i < sc.length; i++) {
+				jQuery(sc[i]).addClass(cssClass);
+				for (var f = 0; f < config.length; f++) {
+					if (config[f].cssClass != cssClass) {
+						jQuery(sc[i]).removeClass(config[f].cssClass);
+					}
+				}
+			}
+		} else {
+			for (var i = 0; i < sc.length; i++) {
+				jQuery(sc[i]).removeClass(cssClass);
+			}
+		}
+	}
+
+	/**
+	 * Init method of the Table-plugin transforms all tables in the document
+	 *
+	 * @return void
+	 */
+	TablePlugin.init = function() {
+		var that = this,
+		    isEnabled = {};
+
+		// apply settings
+		this.tableConfig = this.checkConfig(this.tableConfig||this.settings.tableConfig);
+		this.columnConfig = this.checkConfig(this.columnConfig||this.settings.columnConfig);
+		this.rowConfig = this.checkConfig(this.rowConfig||this.settings.rowConfig);
+		this.cellConfig = this.checkConfig(this.cellConfig||this.settings.cellConfig);
+
+		// table resize settings
+		this.tableResize = this.settings.tableResize === undefined ? false : this.settings.tableResize;
+		this.colResize = this.settings.colResize === undefined ? false : this.settings.colResize;
+		this.rowResize = this.settings.rowResize === undefined ? false : this.settings.rowResize;
+
+		// disable table resize settings on browsers below IE8
+		if (jQuery.browser.msie && parseInt(jQuery.browser.version, 10) < 8) {
+			this.tableResize = false;
+			this.colResize = false;
+			this.rowResize = false;
+		}
+
+		// add reference to the create layer object
+		this.createLayer = new CreateLayer( this );
+
+		// subscribe for the 'editableActivated' event to activate all tables in the editable
+		Aloha.bind( 'aloha-editable-created', function (event, editable) {
+			var config = that.getEditableConfig(editable.obj);
+			isEnabled[editable.getId()] = (-1 !== jQuery.inArray('table', config));
+
+			// add a mousedown event to all created editables to check if focus leaves a table
+			editable.obj.bind( 'mousedown', function ( jqEvent ) {
+				TablePlugin.setFocusedTable( undefined );
+			} );
+
+			editable.obj.find('table').each(function (__unused__, elem) {
+				createNewTable(elem);
+			});
+		} );
+
+		// initialize the table buttons
+		this.initTableButtons();
+
+		Aloha.bind( 'aloha-table-selection-changed', function () {
+
+			// check if selected cells are split/merge able and set button status
+			if ( typeof TablePlugin.activeTable !== 'undefined' &&
+				TablePlugin.activeTable.selection ) {
+
+				TablePlugin.updateFloatingMenuScope();
+
+				if ( TablePlugin.activeTable.selection.cellsAreSplitable() ) {
+					that._splitcellsButton.enable(true);
+					that._splitcellsRowButton.enable(true);
+					that._splitcellsColumnButton.enable(true);
+				} else {
+					that._splitcellsButton.enable(false);
+					that._splitcellsRowButton.enable(false);
+					that._splitcellsColumnButton.enable(false);
+				}
+
+				if ( TablePlugin.activeTable.selection.cellsAreMergeable() ) {
+					that._mergecellsButton.enable(true);
+					that._mergecellsRowButton.enable(true);
+					that._mergecellsColumnButton.enable(true);
+				} else {
+					that._mergecellsButton.enable(false);
+					that._mergecellsRowButton.enable(false);
+					that._mergecellsColumnButton.enable(false);
+				}
+			}
+
+		});
+
+		Aloha.bind( 'aloha-selection-changed', function (event, rangeObject) {
+			// this case probably occurs when the selection is empty?
+			if (!rangeObject.startContainer || !Aloha.activeEditable) {
+				return;
+			}
+
+			// show hide buttons regarding configuration and DOM position
+			if (isEnabled[Aloha.activeEditable.getId()] && Aloha.Selection.mayInsertTag('table') ) {
+				that._createTableButton.show();
+			} else {
+				that._createTableButton.hide();
+			}
+
+			if (!that.activeTable) {
+				return;
+			}
+
+			// check wheater we are inside a table
+			var table = rangeObject.findMarkup(function() {
+				return this.nodeName === 'TABLE';
+			}, Aloha.activeEditable.obj);
+			if (table) {
+				TablePlugin.updateFloatingMenuScope();
+				TablePlugin.setActiveCellStyle();
+			} else {
+				that.activeTable.selection.cellSelectionMode = false;
+				that.activeTable.selection.baseCellPosition = null;
+				that.activeTable.selection.lastSelectionRange = null;
+				that.activeTable.focusOut();
+			}
+		});
+
+		Aloha.bind('aloha-editable-activated', function (__event__, data) {
+			that._splitcellsButton.enable(false);
+			that._mergecellsButton.enable(false);
+			that._splitcellsRowButton.enable(false);
+			that._mergecellsRowButton.enable(false);
+			that._splitcellsColumnButton.enable(false);
+			that._mergecellsColumnButton.enable(false);
+
+			data.editable.obj.find('table').each(function () {
+				var registry = TablePlugin.TableRegistry;
+				for (var i = 0; i < registry.length; i++) {
+					if (registry[i].obj.attr('id') === jQuery(this).attr('id')) {
+						registry[i].activate();
+						return true;
+					}
+				}
+
+				// Because table this is a new table that is not yet in the
+				// registry.
+				createNewTable(this);
+			});
+
+		});
+
+		Aloha.bind('aloha-editable-deactivated', function () {
+			if (TablePlugin.activeTable) {
+				TablePlugin.activeTable.selection.unselectCells();
+			}
+			TablePlugin.setFocusedTable(undefined);
+			var registry = TablePlugin.TableRegistry;
+			for (var i = 0; i < registry.length; i++) {
+				registry[i].deactivate();
+			}
+		});
+
+		Aloha.bind('aloha-smart-content-changed', function () {
+			if (Aloha.activeEditable) {
+				Aloha.activeEditable.obj.find('table').each(function () {
+					if (TablePlugin.indexOfTableInRegistry(this) == -1) {
+						if (createNewTable(this)) {
+							this.id = GENTICS.Utils.guid();
+						}
+					}
+				});
+			}
+		});
+
+		if (this.settings.summaryinsidebar) {
+			Aloha.bind('aloha-plugins-loaded', function () {
+				that.initSidebar(Aloha.Sidebar.right.show());
+			});
+		}
+	};
+
+	//namespace prefix for this plugin
+	var tableNamespace = 'aloha-table';
+
+	function nsSel () {
+		var stringBuilder = [], prefix = tableNamespace;
+		jQuery.each(arguments, function () { stringBuilder.push('.' + (this == '' ? prefix : prefix + '-' + this)); });
+		return jQuery.trim(stringBuilder.join(' '));
+	};
+
+	//Creates string with this component's namepsace prefixed the each classname
+	function nsClass () {
+		var stringBuilder = [], prefix = tableNamespace;
+		jQuery.each(arguments, function () { stringBuilder.push(this == '' ? prefix : prefix + '-' + this); });
+		return jQuery.trim(stringBuilder.join(' '));
+	};
+
+	TablePlugin.initSidebar = function(sidebar) {
+		var pl = this;
+		pl.sidebar = sidebar;
+		pl.sidebarPanel = sidebar.addPanel({
+
+            id       : nsClass('sidebar-panel'),
+            title    : i18n.t('table.sidebar.title'),
+            content  : '',
+            expanded : true,
+            activeOn : 'table',
+
+            onInit   : function () {
+            	var that = this,
+	            content = this.setContent(
+	                '<label class="' + nsClass('label') + '" for="' + nsClass('textarea') + '" >' + i18n.t('table.label.target') + '</label>' +
+	                	'<textarea id="' + nsClass('textarea') + '" class="' + nsClass('textarea') + '" />').content;
+
+            	jQuery(nsSel('textarea')).live('keyup', function() {
+					//The original developer thought that escaping the
+					//quote characters of the textarea value are
+					//necessary to work around a bug in IE. I could not
+					//reproduce the bug, so I commented the following
+					//out.
+					//.replace("\"", '&quot;').replace("'", "&#39;")
+ 					jQuery(that.effective).attr('summary', jQuery(nsSel('textarea')).val());
+ 					var waiDiv = jQuery('div[class*="wai"]', 'table#' + jQuery(that.effective).attr('id'));
+ 					waiDiv.removeClass(pl.get('waiGreen'));
+ 					waiDiv.removeClass(pl.get('waiRed'));
+
+ 					if (jQuery(nsSel('textarea')).val().trim() != '') {
+ 						waiDiv.addClass(pl.get('waiGreen'));
+				    } else {
+				    	waiDiv.addClass(pl.get('waiRed'));
+				    }
+ 				});
+            },
+
+            onActivate: function (effective) {
+            	var that = this;
+				that.effective = effective;
+				jQuery(nsSel('textarea')).val(jQuery(that.effective).attr('summary'));
+            }
+
+        });
+		sidebar.show();
+	};
+
+	/**
+	 * test if the table is editable
+	 * @return boolean true if the table's parent element is contentEditable, false otherwise
+	 */
+	TablePlugin.isEditableTable = function (table) {
+		return GENTICS.Utils.Dom.isEditable( table );
+	};
+
+	/**
+	 * @param {DOMElement} table
+	 * @return {Number}
+	 */
+	TablePlugin.indexOfTableInRegistry = function ( table ) {
+		var registry = this.TableRegistry;
+
+		for ( var i = 0; i < registry.length; i++ ) {
+			// We need to find exactly the same object from the
+			// registry since we could also deal with cloned objects
+			if ( registry[ i ].obj[ 0 ].id == table.id ) {
+				return i;
+			}
+		}
+
+		return -1;
+	};
+
+	/**
+	 * @param {DOMElement} table
+	 * @return {Table}
+	 */
+	TablePlugin.getTableFromRegistry = function ( table ) {
+		var i = this.indexOfTableInRegistry( table );
+		if ( i > -1 ) {
+			return this.TableRegistry[ i ];
+		}
+		return null;
+	};
+
+	/**
+	 * Checks whether the current selection is inside a table within an
+	 * editable
+	 *
+	 * @return {Boolean} true if we are inside a table
+	 */
+	TablePlugin.isSelectionInTable = function () {
+		var range = Aloha.Selection.getRangeObject();
+		var container = jQuery( range.commonAncestorContainer );
+
+		if ( container.length == 0 ) {
+			return  false;
+		}
+
+		if ( container.parents( '.aloha-editable table' ).length ) {
+			return true;
+		}
+
+		return false;
+	};
+
+	TablePlugin.preventNestedTables = function () {
+		if ( this.isSelectionInTable() ) {
+			Dialog.alert({
+				title : i18n.t( 'Table' ),
+				text  : i18n.t( 'table.createTable.nestedTablesNoSupported' )
+			});
+
+			return true;
+		}
+
+		return false;
+	};
+
+	TablePlugin.initMergeSplitCellsBtns = function(){
+		// TODO current it is not possible to add the same buttons to
+		//      multiple tabs. To work around this limitation we are
+		//      defining the mergecells and splitcells components
+		//      multiple times, once for each tab.
+
+		this._mergecellsButton = Ui.adopt("mergecells", Button, {
+			tooltip: i18n.t("button.mergecells.tooltip"),
+			icon: "aloha-icon aloha-icon-mergecells",
+			scope: this.name + '.cell',
+			click: function() {
+				if (TablePlugin.activeTable) {
+					TablePlugin.activeTable.selection.mergeCells();
+				}
+			}
+		});
+
+		this._splitcellsButton = Ui.adopt("splitcells", Button, {
+			tooltip: i18n.t("button.splitcells.tooltip"),
+			icon: "aloha-icon aloha-icon-splitcells",
+			scope: this.name + '.cell',
+			click: function() {
+				var activeCell;
+				if (TablePlugin.activeTable) {
+					if (TablePlugin.activeTable.selection.selectedCells.length > 0) {
+						TablePlugin.activeTable.selection.splitCells();
+					} else {
+						// if there is currently no selection, the active cell is split instead
+						activeCell = TablePlugin.selectedOrActiveCells();
+						if (activeCell.length > 0) {
+							Utils.splitCell(activeCell, function () {
+								return TablePlugin.activeTable.newActiveCell().obj;
+							});
+							Aloha.trigger('aloha-table-selection-changed');
+						}
+					}
+				}
+			}
+		});
+
+		this._mergecellsRowButton = Ui.adopt("mergecellsRow", Button, {
+			tooltip: i18n.t("button.mergecells.tooltip"),
+			icon: "aloha-icon aloha-icon-mergecells",
+			scope: this.name + '.row',
+			click: function() {
+				if (TablePlugin.activeTable) {
+					TablePlugin.activeTable.selection.mergeCells();
+				}
+			}
+		});
+
+		this._splitcellsRowButton = Ui.adopt("splitcellsRow", Button, {
+			tooltip: i18n.t("button.splitcells.tooltip"),
+			icon: "aloha-icon aloha-icon-splitcells",
+			scope: this.name + '.row',
+			click: function() {
+				if (TablePlugin.activeTable) {
+					TablePlugin.activeTable.selection.splitCells();
+				}
+			}
+		});
+
+		this._mergecellsColumnButton = Ui.adopt("mergecellsColumn", Button, {
+			tooltip: i18n.t("button.mergecells.tooltip"),
+			icon: "aloha-icon aloha-icon-mergecells",
+			scope: this.name + '.column',
+			click: function() {
+				if (TablePlugin.activeTable) {
+					TablePlugin.activeTable.selection.mergeCells();
+				}
+			}
+		});
+
+		this._splitcellsColumnButton = Ui.adopt("splitcellsColumn", Button, {
+			tooltip: i18n.t("button.splitcells.tooltip"),
+			icon: "aloha-icon aloha-icon-splitcells",
+			scope: this.name + '.column',
+			click: function() {
+				if (TablePlugin.activeTable) {
+					TablePlugin.activeTable.selection.splitCells();
+				}
+			}
+		});
+	};
+
+	TablePlugin.initNaturalFitBtn = function() {
+		var that = this;
+
+		if (this.colResize || this.rowResize) {
+			this._tableNaturalFitButton = Ui.adopt("naturalFit", Button, {
+				tooltip: i18n.t("button.naturalfit.tooltip"),
+				icon: "aloha-icon aloha-icon-table-naturalfit",
+				scope: this.name + '.cell',
+				click: function() {
+					if (that.activeTable) {
+						var tableObj = that.activeTable.obj;
+						tableObj.find('td, th').each(function() {
+							jQuery(this).find('div').css('width', '');
+							jQuery(this).css('width', '');
+						});
+						tableObj.find('tr').each(function() {
+							jQuery(this).css('height', '');
+						});
+					}
+				}
+			});
+		}
+	};
+
+	/**
+	 * Adds default row buttons, and custom formatting buttons to floating menu
+	 */
+	TablePlugin.initRowsBtns = function () {
+		var that = this;
+
+		this._addrowbeforeButton = Ui.adopt("addrowbefore", Button, {
+			tooltip: i18n.t( "button.addrowbefore.tooltip"),
+			icon: "aloha-icon aloha-icon-addrowbefore",
+			scope: this.name + '.row',
+			click: function() {
+				if (that.activeTable) {
+					that.activeTable.addRowBeforeSelection();
+				}
+			}
+		});
+
+		this._addrowafterButton = Ui.adopt("addrowafter", Button, {
+			tooltip: i18n.t("button.addrowafter.tooltip"),
+			icon: "aloha-icon aloha-icon-addrowafter",
+			scope: this.name + '.row',
+			click: function() {
+				if (that.activeTable) {
+					that.activeTable.addRowAfterSelection();
+				}
+			}
+		});
+
+		this._deleterowsButton = Ui.adopt("deleterows", Button, {
+			tooltip: i18n.t("button.delrows.tooltip"),
+			icon: "aloha-icon aloha-icon-deleterows",
+			scope: this.name + '.row',
+			click: function() {
+				if (that.activeTable) {
+					var aTable = that.activeTable;
+					Dialog.confirm({
+						title: i18n.t('Table'),
+						text: i18n.t('deleterows.confirm'),
+						yes: function(){
+							aTable.deleteRows();
+						}
+					});
+				}
+			}
+		});
+
+		this._rowheaderButton = Ui.adopt("rowheader", ToggleButton, {
+			tooltip: i18n.t("button.rowheader.tooltip"),
+			icon: "aloha-icon aloha-icon-rowheader",
+			scope: this.name + '.row',
+			click: function() {
+				if (that.activeTable) {
+					that.activeTable.refresh();
+
+					toggleHeaderStatus(that.activeTable, 'column');
+
+					that.activeTable.selection.unselectCells();
+					that.activeTable.selection.selectRows(that.activeTable.selection.selectedRowIdxs);
+				}
+			}
+		});
+
+		// generate formatting buttons
+		this.rowMSItems = [];
+		jQuery.each(this.rowConfig, function (j, itemConf) {
+			that.rowMSItems.push({
+				name: itemConf.name,
+				text: i18n.t(itemConf.text),
+				tooltip: i18n.t(itemConf.tooltip),
+				iconClass: 'aloha-icon aloha-row-layout ' + itemConf.iconClass,
+				click: function () {
+					if (that.activeTable) {
+						applyStyle(that.rowConfig, itemConf.cssClass, that.activeTable.selection.selectedCells);
+
+						// selection could have changed.
+						that.activeTable.selectRows();
+					}
+				}
+			});
+		});
+
+		if (this.rowMSItems.length > 0) {
+			this.rowMSItems.push({
+				name    : 'removeFormat',
+				text    : i18n.t('button.removeFormat.text'),
+				tooltip : i18n.t('button.removeFormat.tooltip'),
+				'cls'   : 'aloha-ui-multisplit-fullwidth',
+				wide    : true,
+				click   : function () {
+					if (that.activeTable) {
+						var sc = that.activeTable.selection.selectedCells;
+						// if a selection was made, transform the selected cells
+						for (var i = 0; i < sc.length; i++) {
+							for (var f = 0; f < that.rowConfig.length; f++) {
+								jQuery(sc[i]).removeClass(that.rowConfig[f].cssClass);
+							}
+						}
+						// selection could have changed.
+						that.activeTable.selectRows();
+					}
+				}
+			});
+		}
+
+		this.rowMSButton = MultiSplitButton({
+			items: this.rowMSItems,
+			name: 'formatRow',
+			hideIfEmpty: true,
+			scope: this.name + '.row'
+		});
+	};
+
+	/**
+	 * Adds default column buttons, and custom formatting buttons to floating menu
+	 */
+	TablePlugin.initColumnBtns = function () {
+		var that = this;
+
+		this._addcolumnleftButton = Ui.adopt("addcolumnleft", Button, {
+			tooltip: i18n.t("button.addcolleft.tooltip"),
+			icon: "aloha-icon aloha-icon-addcolumnleft",
+			scope: this.name + '.column',
+			click: function() {
+				if (that.activeTable) {
+					that.activeTable.addColumnsLeft();
+				}
+			}
+		});
+
+		this._addcolumnrightButton = Ui.adopt("addcolumnright", Button, {
+			tooltip: i18n.t("button.addcolright.tooltip"),
+			icon: "aloha-icon aloha-icon-addcolumnright",
+			scope: this.name + '.column',
+			click: function() {
+				if (that.activeTable) {
+					that.activeTable.addColumnsRight();
+				}
+			}
+		});
+
+		this._deletecolumnsButton = Ui.adopt("deletecolumns", Button, {
+			tooltip: i18n.t("button.delcols.tooltip"),
+			icon: "aloha-icon aloha-icon-deletecolumns",
+			scope: this.name + '.column',
+			click: function() {
+				if (that.activeTable) {
+					var aTable = that.activeTable;
+					Dialog.confirm({
+						title: i18n.t('Table'),
+						text: i18n.t('deletecolumns.confirm'),
+						yes: function(){
+							aTable.deleteColumns();
+						}
+					});
+				}
+			}
+		});
+
+		this._columnheaderButton = Ui.adopt("columnheader", ToggleButton, {
+			tooltip: i18n.t("button.columnheader.tooltip"),
+			icon: "aloha-icon aloha-icon-columnheader",
+			scope: this.name + '.column',
+			click: function() {
+				if (that.activeTable) {
+					that.activeTable.refresh();
+
+					toggleHeaderStatus(that.activeTable, 'row');
+
+					that.activeTable.selection.unselectCells();
+					that.activeTable.selection.selectColumns(that.activeTable.selection.selectedColumnIdxs);
+				}
+			}
+		});
+
+		// generate formatting buttons
+		this.columnMSItems = [];
+		jQuery.each(this.columnConfig, function (j, itemConf) {
+			var item = {
+				name	  : itemConf.name,
+				text	  : i18n.t(itemConf.text),
+				tooltip	  : i18n.t(itemConf.tooltip),
+				iconClass : 'aloha-icon aloha-column-layout ' + itemConf.iconClass,
+				click	  : function (x,y,z) {
+					if (that.activeTable) {
+						applyStyle(that.columnConfig, itemConf.cssClass, that.activeTable.selection.selectedCells);
+
+						// selection could have changed.
+						that.activeTable.selectColumns();
+					}
+				}
+			};
+
+			that.columnMSItems.push(item);
+		});
+
+		if (this.columnMSItems.length > 0) {
+			this.columnMSItems.push({
+				name	: 'removeFormat',
+				text	: i18n.t('button.removeFormat.text'),
+				tooltip	: i18n.t('button.removeFormat.tooltip'),
+				'cls'   : 'aloha-ui-multisplit-fullwidth',
+				wide	: true,
+				click	: function () {
+					if (that.activeTable) {
+						var sc = that.activeTable.selection.selectedCells;
+						// if a selection was made, transform the selected cells
+						for (var i = 0; i < sc.length; i++) {
+							for (var f = 0; f < that.columnConfig.length; f++) {
+								jQuery(sc[i]).removeClass(that.columnConfig[f].cssClass);
+							}
+						}
+						// selection could have changed.
+						that.activeTable.selectColumns();
+					}
+				}
+			});
+		}
+
+		this.columnMSButton = MultiSplitButton({
+			items: this.columnMSItems,
+			name: 'formatColumn',
+			hideIfEmpty: true,
+			scope: this.name + '.column'
+		});
+	};
+
+	/**
+	 * Adds custom formatting buttons for cells to floating menu
+	 */
+	TablePlugin.initCellBtns = function () {
+		var that = this;
+
+		// generate formatting buttons
+		this.cellMSItems = [];
+		jQuery.each(this.cellConfig, function (j, itemConf) {
+			var item = {
+				name	  : itemConf.name,
+				text	  : i18n.t(itemConf.text),
+				tooltip	  : i18n.t(itemConf.tooltip),
+				iconClass : 'aloha-icon aloha-column-layout ' + itemConf.iconClass,
+				click	  : function (x,y,z) {
+					if (that.activeTable) {
+						applyStyle(that.cellConfig, itemConf.cssClass, that.selectedOrActiveCells());
+
+						that.setActiveCellStyle();
+					}
+				}
+			};
+
+			that.cellMSItems.push(item);
+		});
+
+		if (this.cellMSItems.length > 0) {
+			this.cellMSItems.push({
+				name	: 'removeFormat',
+				text	: i18n.t('button.removeFormat.text'),
+				tooltip	: i18n.t('button.removeFormat.tooltip'),
+				'cls'   : 'aloha-ui-multisplit-fullwidth',
+				wide	: true,
+				click	: function () {
+					if (that.activeTable) {
+						var sc = that.selectedOrActiveCells();
+						// if a selection was made, transform the selected cells
+						for (var i = 0; i < sc.length; i++) {
+							for (var f = 0; f < that.cellConfig.length; f++) {
+								jQuery(sc[i]).removeClass(that.cellConfig[f].cssClass);
+							}
+						}
+
+						that.setActiveCellStyle();
+					}
+				}
+			});
+		}
+
+		this.cellMSButton = MultiSplitButton({
+			items: this.cellMSItems,
+			name: 'formatCell',
+			hideIfEmpty: true,
+			scope: this.name + '.cell'
+		});
+	};
+
+
+	/**
+	 * initialize the buttons and register them on floating menu
+	 */
+	TablePlugin.initTableButtons = function () {
+		var that = this;
+
+		// generate the new scopes
+		Scopes.createScope(this.name + '.row', 'Aloha.continuoustext');
+		Scopes.createScope(this.name + '.column', 'Aloha.continuoustext');
+		Scopes.createScope(this.name + '.cell', 'Aloha.continuoustext');
+
+		this._createTableButton = Ui.adopt("createTable", Button, {
+			tooltip: i18n.t("button.createtable.tooltip"),
+			icon: "aloha-icon aloha-icon-createTable",
+			scope: 'Aloha.continuoustext',
+			click: function() {
+				TablePlugin.createDialog(this.element);
+			}
+		});
+
+		// now the specific table buttons
+
+		// generate formatting buttons for columns
+		this.initColumnBtns();
+
+		// generate formatting buttons for rows
+		this.initRowsBtns();
+
+		// generate formatting buttons for cells
+		this.initCellBtns();
+
+		this.initMergeSplitCellsBtns();
+
+		this.initNaturalFitBtn();
+
+		// generate formatting buttons for tables
+		this.tableMSItems = [];
+
+		var tableConfig = this.tableConfig;
+
+		jQuery.each(tableConfig, function(j, itemConf){
+			that.tableMSItems.push({
+				name: itemConf.name,
+				text: i18n.t(itemConf.text),
+				tooltip: i18n.t(itemConf.tooltip),
+				iconClass: 'aloha-icon aloha-table-layout ' + itemConf.iconClass,
+				click: function(){
+					// set table css class
+					if (that.activeTable) {
+						if (!that.activeTable.obj.hasClass(itemConf.cssClass)) {
+							for (var f = 0; f < tableConfig.length; f++) {
+								that.activeTable.obj.removeClass(tableConfig[f].cssClass);
+							}
+							that.activeTable.obj.addClass(itemConf.cssClass);
+							that.tableMSButton.setActiveItem(itemConf.cssClass);
+						} else {
+							for (var f = 0; f < tableConfig.length; f++) {
+								that.activeTable.obj.removeClass(tableConfig[f].cssClass);
+							}
+							that.tableMSButton.setActiveItem();
+						}
+					}
+				}
+			});
+		});
+
+		if(this.tableMSItems.length > 0) {
+			this.tableMSItems.push({
+				name    : 'removeFormat',
+				text    : i18n.t('button.removeFormat.text'),
+				tooltip : i18n.t('button.removeFormat.tooltip'),
+				'cls'   : 'aloha-ui-multisplit-fullwidth',
+				wide    : true,
+				click   : function () {
+					// remove all table classes
+					if (that.activeTable) {
+						for (var f = 0; f < tableConfig.length; f++) {
+							that.activeTable.obj.removeClass(that.tableConfig[f].cssClass);
+						}
+						that.tableMSButton.setActiveItem();
+					}
+				}
+			});
+		}
+
+		this.tableMSButton = MultiSplitButton({
+			items : this.tableMSItems,
+			name : 'formatTable',
+			hideIfEmpty: true,
+			scope: this.name + '.cell'
+		});
+
+		this._tableCaptionButton = Ui.adopt("tableCaption", ToggleButton, {
+			tooltip: i18n.t("button.caption.tooltip"),
+			icon: "aloha-icon aloha-icon-table-caption",
+			scope: this.name + '.cell',
+			click: function() {
+				if (that.activeTable) {
+					// look if table object has a child caption
+					if ( that.activeTable.obj.children("caption").is('caption') ) {
+						that.activeTable.obj.children("caption").remove();
+					} else {
+						var captionText = i18n.t('empty.caption');
+						var c = jQuery('<caption></caption>');
+						that.activeTable.obj.prepend(c);
+						that.makeCaptionEditable(c, captionText);
+
+						// get the editable span within the caption and select it
+						var cDiv = c.find('div').eq(0);
+						var captionContent = cDiv.contents().eq(0);
+						if (captionContent.length > 0) {
+							var newRange = new GENTICS.Utils.RangeObject();
+							newRange.startContainer = newRange.endContainer = captionContent.get(0);
+							newRange.startOffset = 0;
+							newRange.endOffset = captionContent.text().length;
+
+							// blur all editables within the table
+							that.activeTable.obj.find('div.aloha-table-cell-editable').blur();
+
+							cDiv.focus();
+							newRange.select();
+							Aloha.Selection.updateSelection();
+						}
+					}
+				}
+			}
+		});
+
+		this.summary = AttributeField( {
+			width : 275,
+			name  : 'tableSummary',
+			noTargetHighlight: true,
+			scope: this.name + '.cell'
+		} );
+
+		this.summary.addListener( 'keyup', function( event ) {
+			if (that.activeTable) {
+				that.activeTable.checkWai();
+			}
+		} );
+	};
+
+	/**
+	 * Helper method to make the caption editable
+	 * @param caption caption as jQuery object
+	 * @param captionText default text for the caption
+	 */
+	TablePlugin.makeCaptionEditable = function(caption, captionText) {
+		var that = this;
+		var cSpan = caption.children('div');
+		if (cSpan.length === 0) {
+			// generate a new div
+			cSpan = jQuery('<div></div>');
+			jQuery(cSpan).addClass('aloha-ui');
+			jQuery(cSpan).addClass('aloha-editable-caption');
+			if (caption.contents().length > 0) {
+				// when the caption has content, we wrap it with the new div
+				cSpan.append(caption.contents());
+				caption.append(cSpan);
+			} else {
+				// caption has no content, so insert the default caption text
+				if (captionText) {
+					cSpan.text(captionText);
+				}
+				// and append the div into the caption
+				caption.append(cSpan);
+			}
+		} else if (cSpan.length > 1) {
+			// merge multiple divs (they are probably created by IE)
+			caption.children('div:not(:first-child)').each(function () {
+				$this = jQuery(this);
+				cSpan.eq(0).append($this.contents());
+				$this.remove();
+			});
+			cSpan = cSpan.eq(0);
+		}
+		// make the div editable
+		cSpan.contentEditable(true);
+	};
+
+	/**
+	 * This function adds the createDialog to the calling element
+	 *
+	 * @param callingElement
+	 *            The element, which was clicked. It's needed to set the right
+	 *            position to the create-table-dialog.
+	 */
+	TablePlugin.createDialog = function(callingElement) {
+		// set the calling element to the layer the calling element mostly will be
+		// the element which was clicked on it is used to position the createLayer
+		this.createLayer.set('target', callingElement);
+
+		// show the createLayer
+		this.createLayer.show();
+	};
+
+	/**
+	 * Creates a normal html-table, "activates" this table and inserts it into the
+	 * active Editable
+	 *
+	 * @param cols
+	 *            number of colums for the created table
+	 * @param cols
+	 *            number of rows for the created table
+	 * @return void
+	 */
+	TablePlugin.createTable = function(cols, rows) {
+		if ( this.preventNestedTables() ) {
+			return;
+		}
+
+		// Check if there is an active Editable and that it contains an element (= .obj)
+		if ( Aloha.activeEditable && typeof Aloha.activeEditable.obj !== 'undefined' ) {
+			// create a dom-table object
+			var table = document.createElement( 'table' );
+			var tableId = table.id = GENTICS.Utils.guid();
+			var tbody = document.createElement( 'tbody' );
+
+			// create "rows"-number of rows
+			for ( var i = 0; i < rows; i++ ) {
+				var tr = document.createElement( 'tr' );
+				// create "cols"-number of columns
+				for ( var j = 0; j < cols; j++ ) {
+					var text = document.createTextNode( '\u00a0' );
+					var td = document.createElement( 'td' );
+					td.appendChild( text );
+					tr.appendChild( td );
+				}
+				tbody.appendChild( tr );
+			}
+			table.appendChild( tbody );
+
+			prepareRangeContainersForInsertion(
+				Aloha.Selection.getRangeObject(), table );
+
+			// insert the table at the current selection
+			GENTICS.Utils.Dom.insertIntoDOM(
+				jQuery( table ),
+				Aloha.Selection.getRangeObject(),
+				Aloha.activeEditable.obj
+			);
+
+			cleanupAfterInsertion();
+
+			var tableReloadedFromDOM = document.getElementById( tableId );
+			var tableObj = createNewTable(tableReloadedFromDOM);
+
+			if (tableObj) {
+				// Because without the 10ms delay, we cannot place the cursor
+				// automatically into the first cell in IE.
+				if ($.browser.msie) {
+					window.setTimeout(function () {
+						tableObj.cells[0].wrapper.get(0).focus();
+					}, 20 );
+				} else {
+					tableObj.cells[0].wrapper.get(0).focus();
+				}
+			}
+
+			// The selection starts out in the first cell of the new
+			// table. The table tab/scope has to be activated
+			// accordingly.
+			tableObj.focus();
+			TablePlugin.activeTable.selection.selectionType = 'cell';
+			TablePlugin.updateFloatingMenuScope();
+
+		} else {
+			this.error( 'There is no active Editable where the table can be\
+				inserted!' );
+		}
+	};
+
+	TablePlugin.setFocusedTable = function(focusTable) {
+		var that = this;
+
+		// clicking outside the table unselects the cells of the table
+		if ( null == focusTable && null != this.activeTable ) {
+			this.activeTable.selection.unselectCells();
+		}
+
+		for (var i = 0; i < TablePlugin.TableRegistry.length; i++) {
+			TablePlugin.TableRegistry[i].hasFocus = false;
+		}
+		if (typeof focusTable != 'undefined') {
+			this.summary.setTargetObject(focusTable.obj, 'summary');
+			if ( focusTable.obj.children("caption").is('caption') ) {
+				// set caption button
+				this._tableCaptionButton.setState(true);
+				var c = focusTable.obj.children("caption");
+				that.makeCaptionEditable(c);
+			}
+			focusTable.hasFocus = true;
+		}
+		TablePlugin.activeTable = focusTable;
+
+		// show configured formatting classes
+		for (var i = 0; i < this.tableMSItems.length; i++) {
+			this.tableMSButton.showItem(this.tableMSItems[i].name);
+		}
+		this.tableMSButton.setActiveItem();
+
+		if (this.activeTable) {
+			for (var i = 0; i < this.tableConfig.length; i++) {
+				if (this.activeTable.obj.hasClass(this.tableConfig[i].cssClass)) {
+					this.tableMSButton.setActiveItem(this.tableConfig[i].name);
+				}
+			}
+		}
+	};
+
+	/**
+	 * Calls the Aloha.log function with 'error' level
+	 *
+	 * @see Aloha.log
+	 * @param msg
+	 *            The message to display
+	 * @return void
+	 */
+	TablePlugin.error = function(msg) {
+		Aloha.Log.error(this, msg);
+	};
+
+	/**
+	 * Calls the Aloha.log function with 'debug' level
+	 *
+	 * @see Aloha.log
+	 * @param msg
+	 *            The message to display
+	 * @return void
+	 */
+	TablePlugin.debug = function(msg) {
+		Aloha.Log.debug(this, msg);
+	};
+
+	/**
+	 * Calls the Aloha.log function with 'info' level
+	 *
+	 * @see Aloha.log
+	 * @param msg
+	 *            The message to display
+	 * @return void
+	 */
+	TablePlugin.info = function(msg) {
+		Aloha.Log.info(this, msg);
+	};
+
+	/**
+	 * Calls the Aloha.log function with 'info' level
+	 *
+	 * @see Aloha.log
+	 * @param msg
+	 *            The message to display
+	 * @return void
+	 */
+	TablePlugin.log = function(msg) {
+		Aloha.log('log', this, msg);
+	};
+
+	/**
+	 * The "get"-method returns the value of the given key.
+	 * First it searches in the config for the property.
+	 * If there is no property with the given name in the
+	 * "config"-object it returns the entry associated with
+	 * in the parameters-object
+	 *
+	 * @param property
+	 * @return void
+	 *
+	 */
+	TablePlugin.get = function (property) {
+		if (this.config[property]) {
+			return this.config[property];
+		}
+		if (this.parameters[property]) {
+			return this.parameters[property];
+		}
+		return undefined;
+	};
+
+	/**
+	 * The "set"-method takes a key and a value. It checks if there is a
+	 * key-value pair in the config-object. If so it saves the data in the
+	 * config-object. If not it saves the data in the parameters-object.
+	 *
+	 * @param key the key which should be set
+	 * @param value the value which should be set for the associated key
+	 */
+	TablePlugin.set = function (key, value) {
+		if (this.config[key]) {
+			this.config[key] = value;
+		}else{
+			this.parameters[key] = value;
+		}
+	};
+
+	/**
+	 * Make the given jQuery object (representing an editable) clean for saving
+	 * Find all tables and deactivate them
+	 * @param obj jQuery object to make clean
+	 * @return void
+	 */
+	TablePlugin.makeClean = function ( obj ) {
+		var that = this;
+		obj.find( 'table' ).each( function () {
+			// Make sure that we only deactivate tables in obj which have the
+			// same id as tables which have been activated and registered
+			if ( that.getTableFromRegistry( this ) ) {
+				( new Table( this, that ) ).deactivate();
+				// remove the id attribute
+				jQuery(this).attr('id', null);
+			}
+		} );
+	};
+
+	/**
+	 * String representation of the Table-object
+	 *
+	 * @return The plugins namespace (string)
+	 */
+	TablePlugin.toString = function() {
+		return this.prefix;
+	};
+
+	TablePlugin.updateFloatingMenuScope = function() {
+		if ( null != TablePlugin.activeTable && null != TablePlugin.activeTable.selection.selectionType ) {
+			Scopes.setScope(TablePlugin.name + '.' + TablePlugin.activeTable.selection.selectionType);
+		}
+	};
+
+	/**
+	 * Set the cell-style to match the active item, if all selected cells have the same style
+	 * TODO: Algorithm very similar to setActiveStyle in table.js, should be refactored
+	 */
+	TablePlugin.setActiveCellStyle = function() {
+		var that = this;
+		var allSelected = false;
+		var className;
+
+		// reset any selected cell styles
+		this.cellMSButton.setActiveItem();
+
+		var selectedCells = that.selectedOrActiveCells();
+
+		for (var i = 0; i < that.cellConfig.length; i++) {
+			if (jQuery(selectedCells[0]).hasClass(that.cellConfig[i].cssClass) ) {
+				className = that.cellConfig[i].name;
+				allSelected = true;
+				break;
+			}
+		}
+
+		// if all selected cells have the same class, set it as active
+		jQuery(selectedCells).each(function(index) {
+			if (!jQuery(this).hasClass(className)) {
+				allSelected = false;
+			}
+		});
+		if (allSelected) {
+			this.cellMSButton.setActiveItem(className);
+		}
+	};
+
+	TablePlugin.selectedOrActiveCells = function() {
+		var that = this;
+		var sc = this.activeTable.selection.selectedCells;
+
+		// if there are no selected cells,
+		// set the active cell as the selected cell.
+		if (!sc || sc.length < 1) {
+			var activeCell = function() {
+			var range = Aloha.Selection.getRangeObject();
+				if (Aloha.activeEditable) {
+					return range.findMarkup( function() {
+							return this.nodeName.toLowerCase() === 'td';
+					}, Aloha.activeEditable.obj );
+				} else {
+					return null;
+				}
+			}
+
+			var active_cell = activeCell();
+			return (active_cell ? [ active_cell ] : []);
+		} else {
+			return sc;
+		}
+	};
+
+	PluginManager.register(TablePlugin);
+
+	/**
+	 * Detects a situation where we are about to insert content into a
+	 * selection that looks like this: <p> [</p>...
+	 * We will assume that the nbsp inside the <p> node was placed there to
+	 * "prop-up" the empty paragraph--that is--to make the empty paragraph
+	 * visible in HTML5 conformant rendering engines, like WebKit. Without the
+	 * white space, such browsers would correctly render an empty <p> as
+	 * invisible.
+	 *
+	 * If we detect this situation, we remove the white space so that when we
+	 * paste new content into the paragraph, it is not be split and leaving an
+	 * empty paragraph on top of the pasted content.
+	 *
+	 * Note that we do not use <br />'s to prop up the paragraphs, as WebKit
+	 * does, because IE, will break from the HTML5 specification and will
+	 * display empty paragraphs if they are content-editable. So a <br />
+	 * inside an empty content-editable paragraph will result in 2 lines to be
+	 * shown instead of 1 in IE.
+	 *
+	 * @param {Object} range
+	 * @param {DOMElement} table
+	 */
+	function prepareRangeContainersForInsertion ( range, table ) {
+		var	eNode = range.endContainer,
+			sNode = range.startContainer,
+			eNodeLength = ( eNode.nodeType == 3 )
+				? eNode.length
+				: eNode.childNodes.length;
+
+
+		if ( sNode.nodeType == 3 &&
+				sNode.parentNode.tagName == 'P' &&
+					sNode.parentNode.childNodes.length == 1 &&
+						/^(\s|%A0)$/.test( escape( sNode.data ) ) ) {
+			sNode.data = '';
+			range.startOffset = 0;
+
+			// In case ... <p> []</p>
+			if ( eNode == sNode ) {
+				range.endOffset = 0;
+			}
+		}
+
+		// If the table is not allowed to be nested inside the startContainer,
+		// then it will have to be split in order to insert the table.
+		// We will therefore check if the selection touches the start and/or
+		// end of their container nodes.
+		// If they do, we will mark their container so that after they are
+		// split we can check whether or not they should be removed
+		if ( !GENTICS.Utils.Dom.allowsNesting(
+				sNode.nodeType == 3 ? sNode.parentNode : sNode, table ) ) {
+
+			if ( range.startOffset == 0 ) {
+				jQuery( sNode.nodeType == 3 ? sNode.parentNode : sNode )
+					.addClass( 'aloha-table-cleanme' );
+			}
+
+			if ( range.endOffset == eNodeLength ) {
+				jQuery( eNode.nodeType == 3 ? eNode.parentNode : eNode )
+					.addClass( 'aloha-table-cleanme' );
+			}
+		}
+	};
+
+	/**
+	 * Looks for elements marked with "aloha-table-cleanme", and removes them
+	 * if they are absolutely empty.
+	 * Note that this will leave paragraphs which contain empty nested elements
+	 * even though they are also invisible.
+	 * We can consider removing these as well at a later stage, if needed.
+	 */
+	function cleanupAfterInsertion () {
+		var dirty = jQuery( '.aloha-table-cleanme' ).removeClass(
+						'aloha-table-cleanme' );
+
+		for ( var i = 0; i < dirty.length; i++ ) {
+			if ( jQuery.trim( jQuery( dirty[ i ] ).html() ) == '' &&
+					!GENTICS.Utils.Dom.isEditingHost( dirty[ i ] ) ) {
+				jQuery( dirty[ i ] ).remove();
+
+				/*
+				// For debugging: to see what we are deleting
+				jQuery( dirty[ i ] ).css({
+					border: '3px solid red',
+					display: 'block'
+				});
+				*/
+			}
+		}
+	};
+
+	return TablePlugin;
+});

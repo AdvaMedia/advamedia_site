@@ -1,18 +1,1341 @@
+/*global documents: true define: true*/
 /*
 * Aloha Image Plugin - Allow image manipulation in Aloha Editor
 *
-* Author & Copyright (c) 2011 Gentics Software GmbH
+* Author & Copyright (c) 2013 Gentics Software GmbH
 * aloha-sales@gentics.com
 * Contributors
-*       Johannes SchÃ¼th - http://jotschi.de
-*     Nicolas karageuzian - http://nka.me/
-*     Benjamin Athur Lupton - http://www.balupton.com/
-*     Thomas Lete
-*     Nils Dehl
-*     Christopher Hlubek
-*     Edward Tsech
-*     Haymo Meran
+*		Johannes SchÃ¼th - http://jotschi.de
+*		Nicolas karageuzian - http://nka.me/
+*		Benjamin Athur Lupton - http://www.balupton.com/
+*		Thomas Lete
+*		Nils Dehl
+*		Christopher Hlubek
+*		Edward Tsech
+*		Haymo Meran
+*		Martin SchÃ¶nberger
 *
-* Licensed under the terms of http://www.aloha-editor.com/license.html
+* Licensed under the terms of http://www.aloha-editor.org/license.php
 */
-define(["aloha/jquery","aloha/plugin","aloha/floatingmenu","i18n!aloha/nls/i18n","i18n!image/nls/i18n","jquery-plugin!image/vendor/ui/jquery-ui-1.8.10.custom.min","jquery-plugin!image/vendor/jcrop/jquery.jcrop.min","jquery-plugin!image/vendor/mousewheel/mousewheel","css!image/css/image.css","css!image/vendor/ui/ui-lightness/jquery-ui-1.8.10.cropnresize.css","css!image/vendor/jcrop/jquery.jcrop.css"],function(t,n,r,i,s){var o=t,u=t,a=window.GENTICS,f=window.Aloha;return String.prototype.toInteger=String.prototype.toInteger||function(){return parseInt(String(this).replace(/px$/,"")||0,10)},String.prototype.toFloat=String.prototype.toInteger||function(){return parseFloat(String(this).replace(/px$/,"")||0,10)},Number.prototype.toInteger=Number.prototype.toInteger||String.prototype.toInteger,Number.prototype.toFloat=Number.prototype.toFloat||String.prototype.toFloat,o.extend(!0,o.fn,{increase:o.fn.increase||function(e){var t=o(this),n,r;return t.length?(n=t.css(e).toFloat(),r=Math.round((n||1)*1.2),n==r&&r++,t.css(e,r),t):t},decrease:o.fn.decrease||function(e){var t=o(this),n,r;return t.length?(n=t.css(e).toFloat(),r=Math.round((n||0)*.8),n==r&&r>0&&r--,t.css(e,r),t):t}}),n.create("image",{languages:["en","fr","de","ru","cz"],defaultSettings:{maxWidth:1600,minWidth:3,maxHeight:1200,minHeight:3,autoCorrectManualInput:!0,fixedAspectRatio:!1,autoResize:!1,ui:{oneTab:!1,insert:!0,reset:!0,aspectRatioToggle:!0,align:!0,resize:!0,meta:!0,margin:!0,crop:!0,resizable:!0,handles:"ne, se, sw, nw"},onCropped:function(e,t){f.Log.info("Default onCropped invoked",e,t)},onReset:function(e){return f.Log.info("Default onReset invoked",e),!1},onResize:function(e){f.Log.info("Default onResize invoked",e)},onResized:function(e){f.Log.info("Default onResized invoked",e)}},_onCropped:function(e,t){u("#"+this.imgResizeHeightField.id).val(e.height()),u("#"+this.imgResizeWidthField.id).val(e.width()),u("body").trigger("aloha-image-cropped",[e,t]),this.onCropped(e,t)},_onReset:function(e){return u("#"+this.imgResizeHeightField.id).val(e.height()),u("#"+this.imgResizeWidthField.id).val(e.width()),u("body").trigger("aloha-image-reset",e),this.onReset(e)},_onResize:function(e){u("#"+this.imgResizeHeightField.id).val(e.height()),u("#"+this.imgResizeWidthField.id).val(e.width()),u("body").trigger("aloha-image-resize",e),this.onResize(e)},_onResized:function(e){u("#"+this.imgResizeHeightField.id).val(e.height()),u("#"+this.imgResizeWidthField.id).val(e.width()),u("body").trigger("aloha-image-resized",e),this.onResized(e)},imageObj:null,jcAPI:null,keepAspectRatio:!1,startAspectRatio:!1,restoreProps:[],objectTypeFilter:[],init:function(){var e=this,t=f.getPluginUrl("image");this.startAspectRatio=this.settings.fixedAspectRatio,this.config=this.defaultSettings,this.settings=o.extend(!0,this.defaultSettings,this.settings),e.initializeButtons(),e.bindInteractions(),e.subscribeEvents()},initializeButtons:function(){var e=this,t=i.t("floatingmenu.tab.insert"),n=s.t("floatingmenu.tab.img"),o=s.t("floatingmenu.tab.formatting"),u=s.t("floatingmenu.tab.crop"),a=s.t("floatingmenu.tab.resize");r.createScope(this.name,"Aloha.empty");if(this.settings.ui.insert){var f=this.settings.ui.oneTab?n:t;e._addUIInsertButton(f)}if(this.settings.ui.meta){var f=this.settings.ui.oneTab?n:n;e._addUIMetaButtons(f)}if(this.settings.ui.reset){var f=this.settings.ui.reset?n:n;e._addUIResetButton(f)}if(this.settings.ui.align){var f=this.settings.ui.oneTab?n:o;e._addUIAlignButtons(f)}if(this.settings.ui.margin){var f=this.settings.ui.oneTab?n:o;e._addUIMarginButtons(f)}if(this.settings.ui.crop){var f=this.settings.ui.oneTab?n:u;e._addUICropButtons(f)}if(this.settings.ui.resize){var f=this.settings.ui.oneTab?n:a;e._addUIResizeButtons(f)}if(this.settings.ui.aspectRatioToggle){var f=this.settings.ui.oneTab?n:a;e.__addUIAspectRatioToggleButton(f)}},__addUIAspectRatioToggleButton:function(e){var t=this,n=new f.ui.Button({size:"small",tooltip:s.t("button.toggle.tooltip"),toggle:!0,iconClass:"cnr-ratio",onclick:function(e,n){t.toggleKeepAspectRatio()}});this.settings.fixedAspectRatio!=0&&(n.pressed=!0,this.keepAspectRatio=!0),r.addButton(t.name,n,e,20)},_addUIResetButton:function(e){var t=this,n=new f.ui.Button({size:"small",tooltip:s.t("Reset"),toggle:!1,iconClass:"cnr-reset",onclick:function(e,n){t.reset()}});r.addButton(t.name,n,e,2)},_addUIInsertButton:function(e){var t=this;this.insertImgButton=new f.ui.Button({name:"insertimage",iconClass:"aloha-button aloha-image-insert",size:"small",onclick:function(){t.insertImg()},tooltip:s.t("button.addimg.tooltip"),toggle:!1}),r.addButton("Aloha.continuoustext",this.insertImgButton,e,1)},_addUIMetaButtons:function(e){var t=this,n=new f.ui.Button({label:s.t("field.img.src.label"),tooltip:s.t("field.img.src.tooltip"),size:"small"});this.imgSrcField=new f.ui.AttributeField({name:"imgsrc"}),this.imgSrcField.setObjectTypeFilter(this.objectTypeFilter);var i=new f.ui.Button({label:s.t("field.img.title.label"),tooltip:s.t("field.img.title.tooltip"),size:"small"});this.imgTitleField=new f.ui.AttributeField,this.imgTitleField.setObjectTypeFilter(),r.addButton(this.name,this.imgSrcField,e,1)},_addUIAlignButtons:function(e){var t=this,n=new f.ui.Button({iconClass:"aloha-img aloha-image-align-left",size:"small",onclick:function(){var e=o(t.findImgMarkup());e.add(e.parent()).css("float","left")},tooltip:s.t("button.img.align.left.tooltip")});r.addButton(t.name,n,e,1);var i=new f.ui.Button({iconClass:"aloha-img aloha-image-align-right",size:"small",onclick:function(){var e=o(t.findImgMarkup());e.add(e.parent()).css("float","right")},tooltip:s.t("button.img.align.right.tooltip")});r.addButton(t.name,i,e,1);var u=new f.ui.Button({iconClass:"aloha-img aloha-image-align-none",size:"small",onclick:function(){var e=o(t.findImgMarkup());e.add(e.parent()).css({"float":"none",display:"inline-block"})},tooltip:s.t("button.img.align.none.tooltip")});r.addButton(t.name,u,e,1)},_addUIMarginButtons:function(e){var t=this,n=new f.ui.Button({iconClass:"aloha-img aloha-image-padding-increase",toggle:!1,size:"small",onclick:function(){o(t.findImgMarkup()).increase("padding")},tooltip:s.t("padding.increase")});r.addButton(t.name,n,e,2);var i=new f.ui.Button({iconClass:"aloha-img aloha-image-padding-decrease",toggle:!1,size:"small",onclick:function(){o(t.findImgMarkup()).decrease("padding")},tooltip:s.t("padding.decrease")});r.addButton(t.name,i,e,2)},_addUICropButtons:function(e){var t=this;r.createScope("Aloha.img",["Aloha.global"]),this.cropButton=new f.ui.Button({size:"small",tooltip:s.t("Crop"),toggle:!0,iconClass:"cnr-crop",onclick:function(e,n){e.pressed?t.crop():t.endCrop()}}),r.addButton(this.name,this.cropButton,e,3)},_addUIResizeButtons:function(e){var t=this;this.imgResizeHeightField=new f.ui.AttributeField,this.imgResizeHeightField.maxValue=t.settings.maxHeight,this.imgResizeHeightField.minValue=t.settings.minHeight,this.imgResizeWidthField=new f.ui.AttributeField,this.imgResizeWidthField.maxValue=t.settings.maxWidth,this.imgResizeWidthField.minValue=t.settings.minWidth,this.imgResizeWidthField.width=50,this.imgResizeHeightField.width=50;var n=new f.ui.Button({label:s.t("width"),tooltip:s.t("width"),size:"small"});r.addButton(this.name,n,e,30),r.addButton(this.name,this.imgResizeWidthField,e,40);var i=new f.ui.Button({label:s.t("height"),tooltip:s.t("height"),size:"small"});r.addButton(this.name,i,e,50),r.addButton(this.name,this.imgResizeHeightField,e,60)},_addNaturalSizeButton:function(){var e=this,t=new f.ui.Button({iconClass:"aloha-img aloha-image-size-natural",size:"small",toggle:!1,onclick:function(){var t=new Image;t.onload=function(){var n=e.findImgMarkup();e.settings.ui.resizable&&e.endResize(),o(n).css({width:t.width+"px",height:t.height+"px","max-width":"","max-height":""}),e.settings.ui.resizable&&e.resize()},t.src=e.findImgMarkup().src},tooltip:s.t("size.natural")});r.addButton(this.name,t,tabResize,2)},bindInteractions:function(){var e=this;if(this.settings.ui.resizable)try{document.execCommand("enableObjectResizing",!1,!1)}catch(t){f.Log.error(t,"Could not disable enableObjectResizing")}this.settings.ui.meta&&(this.imgSrcField.addListener("keyup",function(t,n){e.srcChange()}),this.imgSrcField.addListener("blur",function(e,t){var n=o(e.getTargetObject());n.attr("src")===""&&n.remove()})),this.settings.onCropped&&typeof this.settings.onCropped=="function"&&(this.onCropped=this.settings.onCropped),this.settings.onReset&&typeof this.settings.onReset=="function"&&(this.onReset=this.settings.onReset),this.settings.onResized&&typeof this.settings.onResized=="function"&&(this.onResized=this.settings.onResized),this.settings.onResize&&typeof this.settings.onResize=="function"&&(this.onResize=this.settings.onResize)},subscribeEvents:function(){var e=this,t=this.settings;o("img").filter(t.globalselector).unbind(),o("img").filter(t.globalselector).click(function(t){e.clickImage(t)}),f.bind("aloha-drop-files-in-editable",function(t,n){var r,i=n.filesObjs.length,s,u;while(--i>=0)s=n.filesObjs[i],s.file.type.match(/image\//)&&(u=e.getEditableConfig(n.editable),r=o("<img/>"),r.css({"max-width":e.maxWidth,"max-height":e.maxHeight}),r.attr("id",s.id),typeof s.src=="undefined"?r.attr("src",s.data):r.attr("src",s.src),a.Utils.Dom.insertIntoDOM(r,n.range,o(f.activeEditable.obj)))}),f.bind("aloha-selection-changed",function(t,n,i){var s,u;i&&i.target&&e.settings.ui.resizable&&!o(i.target).hasClass("ui-resizable-handle")&&e.endResize();if(f.activeEditable!==null){u=e.findImgMarkup(n),s=e.getEditableConfig(f.activeEditable.obj);if(e.settings.ui.insert){if(typeof s=="undefined"){e.insertImgButton.hide();return}e.insertImgButton.show()}u?(e.insertImgButton.hide(),r.setScope(e.name),e.settings.ui.meta&&(e.imgSrcField.setTargetObject(u,"src"),e.imgTitleField.setTargetObject(u,"title")),e.imgSrcField.focus(),r.activateTabOfButton("imgsrc")):e.settings.ui.meta&&e.imgSrcField.setTargetObject(null),r.doLayout()}}),f.bind("aloha-editable-created",function(t,n){try{document.execCommand("enableObjectResizing",!1,!1)}catch(r){f.Log.error(r,"Could not disable enableObjectResizing")}n.obj.delegate("img","mouseup",function(t){e.clickImage(t),t.stopPropagation()})}),e._subscribeToResizeFieldEvents()},autoResize:function(){var e=this,t=e.imageObj.width(),n=e.imageObj.height();return t<e.settings.minWidth||t>e.settings.maxWidth||n<e.settings.minHeight||n>e.settings.maxHeight?(e._setNormalizedFieldValues("width"),e.setSizeByFieldValue(),!0):!1},toggleKeepAspectRatio:function(){this.keepAspectRatio=!this.keepAspectRatio,this.endResize();if(!this.keepAspectRatio)this.startAspectRatio=!1;else if(typeof this.settings.fixedAspectRatio!="number"){var e=this.imageObj.width()/this.imageObj.height();this.startAspectRatio=e}else this.startAspectRatio=this.settings.fixedAspectRatio;this.startResize()},_subscribeToResizeFieldEvents:function(){function t(t,n,r,i){typeof i=="undefined"&&(i=0),typeof r=="undefined"&&(r=8e3);var s=parseInt(t.val());if(isNaN(s))return t.css("background-color","red"),!1;var o=s+n;return n>=0&&o>r?e.settings.autoCorrectManualInput?(t.val(r),!0):(t.css("background-color","red"),!1):n<=0&&o<i?e.settings.autoCorrectManualInput?(t.val(i),!0):(t.css("background-color","red"),!1):(t.css("background-color",""),t.val(s+n),!0)}function n(n){var r=n.data.minValue,i=n.data.maxValue,s=n.data.fieldName;if(n.keyCode==8||n.keyCode==46)u(this).val()>=r&&(typeof e.jcAPI!="undefined"&&e.jcAPI!=null?e.setCropAreaByFieldValue():(e._setNormalizedFieldValues(s),e.setSizeByFieldValue()));else if(n.keyCode<=57&&n.keyCode>=48||n.keyCode<=105&&n.keyCode>=96)u(this).val()>=r&&(typeof e.jcAPI!="undefined"&&e.jcAPI!=null?e.setCropAreaByFieldValue():(e._setNormalizedFieldValues(s),e.setSizeByFieldValue()));else{var o=0;if(n.keyCode==38||n.keyCode==107)o=1;else if(n.keyCode==40||n.keyCode==109)o=-1;if(n.shiftKey||n.metaKey||n.ctrlKey)o*=10;t(u(this),o,i,r)&&(typeof e.jcAPI!="undefined"&&e.jcAPI!=null?e.setCropAreaByFieldValue():(e._setNormalizedFieldValues(s),e.setSizeByFieldValue()))}return n.preventDefault(),!1}function r(n,r){var i=n.data.minValue,s=n.data.maxValue,o=n.data.fieldName;if(n.shiftKey||n.metaKey||n.ctrlKey)r*=10;return t(u(this),r,s,i)&&(typeof e.jcAPI!="undefined"&&e.jcAPI!=null?e.setCropAreaByFieldValue():(e._setNormalizedFieldValues(o),e.setSizeByFieldValue())),!1}var e=this,i=u("#"+e.imgResizeHeightField.id),s={fieldName:"height",maxValue:e.imgResizeHeightField.maxValue,minValue:e.imgResizeHeightField.minValue};i.live("keyup",s,n),i.live("mousewheel",s,r);var o=u("#"+e.imgResizeWidthField.id),a={fieldName:"width",maxValue:e.imgResizeWidthField.maxValue,minValue:e.imgResizeWidthField.minValue};o.live("keyup",a,n),o.live("mousewheel",a,r)},_setNormalizedFieldValues:function(e){var t=this,n=o("#"+t.imgResizeWidthField.id),r=o("#"+t.imgResizeHeightField.id),i=n.val(),s=r.val(),u=t._normalizeSize(i,s,e);n.val(u.width),r.val(u.height)},setSize:function(e,t){var n=this;this.imageObj.width(e),this.imageObj.height(t);var r=this.imageObj.closest(".Aloha_Image_Resize");r.height(t),r.width(e),this._onResize(this.imageObj),this._onResized(this.imageObj)},clickImage:function(e){var t=this;t.imageObj=o(e.target);var n=t.imageObj;r.setScope(t.name);var i=n.closest(".aloha-editable");o(i).contentEditable(!1),this.restoreProps.push({obj:e.srcElement,src:t.imageObj.attr("src"),width:t.imageObj.width(),height:t.imageObj.height()}),u("#"+t.imgResizeHeightField.id).val(t.imageObj.height()),u("#"+t.imgResizeWidthField.id).val(t.imageObj.width()),this.settings.ui.resizable&&this.startResize(),this.settings.autoResize&&this.autoResize()},findImgMarkup:function(e){var t=this,n=this.config,r,i;typeof e=="undefined"&&(e=f.Selection.getRangeObject()),i=o(e.startContainer);try{if(f.activeEditable)return typeof e.startContainer!="undefined"&&typeof e.startContainer.childNodes!="undefined"&&typeof e.startOffset!="undefined"&&typeof e.startContainer.childNodes[e.startOffset]!="undefined"&&e.startContainer.childNodes[e.startOffset].nodeName.toLowerCase()==="img"&&e.startOffset+1===e.endOffset||i.hasClass("Aloha_Image_Resize")?(r=i.find("img")[0],r.css||(r.css=""),r.title||(r.title=""),r.src||(r.src=""),r):null}catch(s){f.Log.debug(s,"Error finding img markup.")}return null},_normalizeSize:function(e,t,n){function i(n){if(t>r.settings.maxHeight){var i={org:t,"new":r.settings.maxHeight};u("body").trigger("aloha-image-resize-outofbounds",["height","max",i]),t=r.settings.maxHeight}else if(t<r.settings.minHeight){var i={org:t,"new":r.settings.minHeight};u("body").trigger("aloha-image-resize-outofbounds",["height","min",i]),t=r.settings.minHeight}r.keepAspectRatio&&(e=t*o,n&&s(!1))}function s(n){if(e>r.settings.maxWidth){var s={org:e,"new":r.settings.maxWidth};u("body").trigger("aloha-image-resize-outofbounds",["width","max",s]),e=r.settings.maxWidth}else if(e<r.settings.minWidth){var s={org:e,"new":r.settings.minWidth};u("body").trigger("aloha-image-resize-outofbounds",["width","min",s]),e=r.settings.minWidth}r.keepAspectRatio&&(t=e/o,n&&i(!1))}var r=this;e=parseInt(e),t=parseInt(t);var o=1.33333;return typeof r.startAspectRatio=="number"&&(o=r.startAspectRatio),n=="width"&&s(!0),n=="height"&&i(!0),{width:Math.floor(e),height:Math.floor(t)}},setSizeByFieldValue:function(){var e=this,t=u("#"+e.imgResizeWidthField.id).val(),n=u("#"+e.imgResizeHeightField.id).val();e.setSize(t,n)},setCropAreaByFieldValue:function(){var e=this,t=e.jcAPI.tellSelect(),n=u("#"+e.imgResizeWidthField.id).val();n=parseInt(n);var r=u("#"+e.imgResizeHeightField.id).val();r=parseInt(r);var i=[t.x,t.y,t.x+n,t.y+r];e.jcAPI.setSelect(i)},insertImg:function(){var e=f.Selection.getRangeObject(),t=this.getEditableConfig(f.activeEditable.obj),n=f.getPluginUrl("image"),r,i,s;e.isCollapsed()?(r="max-width: "+t.maxWidth+"; max-height: "+t.maxHeight,i='<img style="'+r+'" src="'+n+'/img/blank.jpg" title="" />',s=o(i),a.Utils.Dom.insertIntoDOM(s,e,o(f.activeEditable.obj))):f.Log.error("img cannot markup a selection")},srcChange:function(){this.imageObj.attr("src",this.imgSrcField.getQueryValue())},positionCropButtons:function(){var e=o(".jcrop-tracker:first"),t=e.offset(),n=t.top,r=t.left,i=e.height(),s=e.width(),u=0,a=0,f=o("#aloha-CropNResize-btns");n==0&&r==0&&f.hide(),n=parseInt(n+i+3,10),r=parseInt(r+s/2-f.width()/2+10,10),(u!=r||a!=n)&&f.offset({top:n,left:r}),u=r,a=n},initCropButtons:function(){var e=this,t;o("body").append('<div id="aloha-CropNResize-btns" display="none"><button class="cnr-crop-apply" title="'+s.t("Accept")+'"></button>'+'<button class="cnr-crop-cancel" title="'+s.t("Cancel")+'"></button>'+"</div>"),t=o("#aloha-CropNResize-btns"),t.find(".cnr-crop-apply").click(function(){e.acceptCrop()}),t.find(".cnr-crop-cancel").click(function(){e.endCrop()}),this.interval=setInterval(function(){e.positionCropButtons()},10)},destroyCropButtons:function(){o("#aloha-CropNResize-btns").remove(),clearInterval(this.interval)},_disableSelection:function(e){e.find("*").attr("unselectable","on").css({"-moz-user-select":"none","-webkit-user-select":"none","user-select":"none"})},crop:function(){var e=this,t=this.config;this.initCropButtons(),this.settings.ui.resizable&&this.endResize(),this.jcAPI=o.Jcrop(this.imageObj,{onSelect:function(){e._onCropSelect(),setTimeout(function(){r.setScope(e.name)},10)}}),e._disableSelection(u(".jcrop-holder")),e._disableSelection(u("#imageContainer")),e._disableSelection(u("#aloha-CropNResize-btns")),u("body").trigger("aloha-image-crop-start",[this.imageObj])},_onCropSelect:function(){var e=this;o("#aloha-CropNResize-btns").fadeIn("slow"),o(".jcrop-handle").mousedown(function(){o("#aloha-CropNResize-btns").hide()}),o(".jcrop-tracker").mousedown(function(){o("#aloha-CropNResize-btns").hide()});if(typeof e.jcAPI!="undefined"&&e.jcAPI!=null){e.positionCropButtons();var t=e.jcAPI.tellSelect(),n=o("#"+e.imgResizeWidthField.id).val(t.w),r=o("#"+e.imgResizeHeightField.id).val(t.h)}},endCrop:function(){this.jcAPI&&(this.jcAPI.destroy(),this.jcAPI=null),this.destroyCropButtons(),this.cropButton.extButton.toggle(!1),this.settings.ui.resizable&&this.startResize();if(this.keepAspectRatio){var e=this.imageObj.width()/this.imageObj.height();this.startAspectRatio=e}u("body").trigger("aloha-image-crop-stop",[this.imageObj])},acceptCrop:function(){this._onCropped(this.imageObj,this.jcAPI.tellSelect()),this.endCrop()},startResize:function(){var e=this,t=this.imageObj;t=this.imageObj.css({height:this.imageObj.height(),width:this.imageObj.width(),position:"relative","max-height":"","max-width":""}),t.resizable({maxHeight:e.settings.maxHeight,minHeight:e.settings.minHeight,maxWidth:e.settings.maxWidth,minWidth:e.settings.minWidth,aspectRatio:e.startAspectRatio,handles:e.settings.handles,grid:e.settings.grid,resize:function(t,n){e._onResize(e.imageObj)},stop:function(t,n){e._onResized(e.imageObj),this.enableCrop&&setTimeout(function(){r.setScope(e.name),e.done(t)},10)}}),t.css("display","inline-block"),o(".ui-wrapper").attr("contentEditable",!1).addClass("aloha-image-box-active Aloha_Image_Resize aloha").css({position:"relative",display:"inline-block","float":e.imageObj.css("float")}).bind("resizestart",function(e){e.preventDefault()}).bind("mouseup",function(e){e.originalEvent.stopSelectionUpdate=!0})},endResize:function(){if(this.imageObj){var e=this.imageObj.closest(".aloha-editable");o(e).contentEditable(!0)}this.imageObj&&this.imageObj.resizable("destroy").css({top:0,left:0})},reset:function(){this.settings.ui.crop&&this.endCrop(),this.settings.ui.resizable&&this.endResize();if(this._onReset(this.imageObj))return;for(var e=0;e<this.restoreProps.length;e++)if(this.imageObj.get(0)===this.restoreProps[e].obj){this.imageObj.attr("src",this.restoreProps[e].src),this.imageObj.width(this.restoreProps[e].width),this.imageObj.height(this.restoreProps[e].height);return}}})});
+
+define([
+	// js
+	'jquery',
+	'aloha/plugin',
+	'image/image-floatingMenu',
+	'i18n!aloha/nls/i18n',
+	'i18n!image/nls/i18n',
+	'jqueryui',
+	'image/vendor/jcrop/jquery.jcrop.min',
+	'image/vendor/mousewheel/mousewheel'
+], function AlohaImagePlugin(
+	aQuery,
+	Plugin,
+	ImageFloatingMenu,
+	i18nCore,
+	i18n
+){
+
+	'use strict';
+
+	var jQuery = aQuery;
+	var $ = aQuery;
+	var GENTICS = window.GENTICS;
+	var Aloha = window.Aloha;
+	var resizing = false;
+
+	// Attributes manipulation utilities
+	// Aloha team may want to factorize, it could be useful for other plugins
+	// Prototypes
+	String.prototype.toInteger = String.prototype.toInteger || function () {
+		return parseInt(String(this).replace(/px$/, '') || 0, 10);
+	};
+	String.prototype.toFloat = String.prototype.toInteger || function () {
+		return parseFloat(String(this).replace(/px$/, '') || 0, 10);
+	};
+	Number.prototype.toInteger = Number.prototype.toInteger || String.prototype.toInteger;
+	Number.prototype.toFloat = Number.prototype.toFloat || String.prototype.toFloat;
+
+	// Insert jQuery Prototypes
+	jQuery.extend(true, jQuery.fn, {
+		increase: jQuery.fn.increase || function (attr) {
+			var	obj = jQuery(this), value, newValue;
+			if (!obj.length) {
+				return obj;
+			}
+			value = obj.css(attr).toFloat();
+			newValue = Math.round((value || 1) * 1.2);
+			// when value is 2, won't increase
+			if (value === newValue) {
+				newValue++;
+			}
+			obj.css(attr, newValue);
+			return obj;
+		},
+		decrease: jQuery.fn.decrease || function (attr) {
+			var	obj = jQuery(this), value, newValue;
+			// Check
+			if (!obj.length) {
+				return obj;
+			}
+			// Calculate
+			value = obj.css(attr).toFloat();
+			newValue = Math.round((value || 0) * 0.8);
+			// Apply
+			if (value === newValue && newValue > 0) {
+				// when value is 2, won't increase
+				newValue--;
+			}
+			obj.css(attr, newValue);
+			// Chain
+			return obj;
+		}
+	});
+
+	// Create and register Image Plugin
+	return Plugin.create('image', {
+		defaultSettings: {
+			'maxWidth': 1600,
+			'minWidth': 3,
+			'maxHeight': 1200,
+			'minHeight': 3,
+			// This setting will manually correct values that are out of bounds
+			'autoCorrectManualInput': true,
+			// This setting will define a fixed aspect ratio for all resize actions
+			'fixedAspectRatio' : false,
+			// When enabled this setting will order the plugin to automatically resize images to given bounds
+			'autoResize': false,
+			//Image manipulation options - ONLY in default config section
+			ui: {
+				meta		: true, // If imageResizeWidth and imageResizeHeight are displayed, then you will want to set this to true, so that the width and height text fields are updated automatically.
+				crop		: true, // If imageCropButton is displayed, then you have to enable this.
+				resizable	: true	// Resizable ui-drag image
+			},
+			handles     : 'ne, se, sw, nw',   // set handles for resize
+
+			/**
+			 * Crop callback is triggered after the user clicked accept to accept his crop
+			 * @param image jquery image object reference
+			 * @param props cropping properties
+			 */
+			onCropped: function ($image, props) {
+				Aloha.Log.info('Default onCropped invoked', $image, props);
+			},
+
+			/**
+			 * Reset callback is triggered before the internal reset procedure is applied
+			 * if this function returns true, then the reset has been handled by the callback
+			 * which means that no other reset will be applied
+			 * if false is returned the internal reset procedure will be applied
+			 * @param image jquery image object reference
+			 * @return true if a reset has been applied, false otherwise
+			 */
+			onReset: function ($image) {
+				Aloha.Log.info('Default onReset invoked', $image);
+				return false;
+			},
+
+			/**
+			 * Example callback method which gets called while the resize process is being executed.
+			 */
+			onResize: function ($image) {
+				Aloha.Log.info('Default onResize invoked', $image);
+			},
+
+			/**
+			 * Resize callback is triggered after the internal resize procedure is applied.
+			 */
+			onResized: function ($image) {
+				Aloha.Log.info('Default onResized invoked', $image);
+			}
+		},
+
+		/**
+		 * Internal callback hook which gets invoked when cropping has been finished
+		 */
+		_onCropped: function ($image, props) {
+
+			$('body').trigger('aloha-image-cropped', [$image, props]);
+
+			// After successful cropping, the aspect ratio value has to recalculated
+			if (this.keepAspectRatio) {
+				this.aspectRatioValue = this.imageObj.width() / this.imageObj.height();
+			}
+
+			// Call the custom onCropped function
+			this.onCropped($image, props);
+		},
+
+		/**
+		 * Internal callback hook which gets invoked when resetting images
+		 */
+		_onReset: function ($image) {
+
+			// No default behaviour defined besides event triggering
+			$('body').trigger('aloha-image-reset', $image);
+
+			$('#' + this.ui.imgResizeHeightField.getInputId()).val($image.height());
+			$('#' + this.ui.imgResizeWidthField.getInputId()).val($image.width());
+
+			// Call the custom resize function
+			return this.onReset($image);
+		},
+
+		/**
+		 * Internal callback hook which gets invoked while the image is being resized
+		 */
+		_onResize: function ($image) {
+
+			// No default behaviour defined besides event triggering
+			$('body').trigger('aloha-image-resize', $image);
+
+			$('#' + this.ui.imgResizeHeightField.getInputId()).val($image.height());
+			$('#' + this.ui.imgResizeWidthField.getInputId()).val($image.width());
+
+			// Call the custom resize function
+			this.onResize($image);
+		},
+
+		/**
+		 * Internal callback hook which gets invoked when the current resizing action has stopped
+		 */
+		_onResized: function ($image) {
+
+			$('body').trigger('aloha-image-resized', $image);
+
+			$('#' + this.ui.imgResizeHeightField.getInputId()).val($image.height());
+			$('#' + this.ui.imgResizeWidthField.getInputId()).val($image.width());
+
+			// Call the custom resize function
+			this.onResized($image);
+		},
+
+		/**
+		 * The image that is currently edited
+		 */
+		imageObj: null,
+
+
+		/**
+		 * The Jcrop API reference
+		 * this is needed to be able to destroy the cropping frame later on
+		 * the variable is linked to the api object whilst cropping, or set to null otherwise
+		 * strange, but done as documented http://deepliquid.com/content/Jcrop_API.html
+		 */
+		jcAPI: null,
+
+
+		/**
+		 * State variable for the aspect ratio toggle feature
+		 */
+		keepAspectRatio: false,
+
+		/**
+		 * Variable that will hold the value of the aspect ratio. This ratio will be used once startResize has been called
+		 */
+		aspectRatioValue: false,
+
+		/**
+		 * This will contain an image's original properties to be able to undo previous settings
+		 *
+		 * when an image is clicked for the first time, a new object will be added to the array
+		 * {
+		 *		obj : [the image object reference],
+		 *		src : [the original src url],
+		 *		width : [initial width],
+		 *		height : [initial height]
+		 * }
+		 *
+		 * when an image is clicked the second time, the array will be checked for the image object
+		 * reference, to prevent double entries
+		 */
+		restoreProps: [],
+
+		/**
+		 * the defined object types to be used for this instance
+		 */
+		objectTypeFilter: [],
+
+		/**
+		 * Plugin initialization method
+		 */
+		init: function () {
+
+			var plugin = this;
+
+			var imagePluginUrl = Aloha.getPluginUrl('image');
+
+			if ( typeof this.settings.objectTypeFilter != 'undefined' ) {
+				this.objectTypeFilter = this.settings.objectTypeFilter;
+			}
+
+			// Extend the default settings with the custom ones (done by default)
+			plugin.config = plugin.defaultSettings;
+			plugin.settings = jQuery.extend(true, plugin.defaultSettings, plugin.settings);
+
+			// Determine the flag and the value of the aspect ratio depending on settings
+			if ( typeof this.settings.fixedAspectRatio === 'number' ) {
+				this.aspectRatioValue = this.settings.fixedAspectRatio;
+				plugin.keepAspectRatio = true;
+			} else {
+				if ((plugin.settings.fixedAspectRatio) === true) {
+					plugin.keepAspectRatio = true;
+				} else {
+					plugin.keepAspectRatio = false;
+				}
+			}
+
+			plugin.initializeUI();
+			plugin.bindInteractions();
+			plugin.subscribeEvents();
+
+		},
+
+		/**
+		* Create buttons
+		*/
+		initializeUI: function () {
+
+			var that = this;
+
+			this.ui = new ImageFloatingMenu();
+			this.ui.init(this);
+		},
+		/**
+		 * Bind plugin interactions
+		 */
+		bindInteractions: function () {
+			var	plugin = this;
+
+			if (plugin.settings.ui.resizable) {
+				try {
+					// this will disable mozillas image resizing facilities
+					document.execCommand('enableObjectResizing', false, false);
+				} catch (e) {
+					Aloha.Log.info(e, 'Could not disable enableObjectResizing');
+					// this is just for internet explorer, which will not support disabling enableObjectResizing
+				}
+			}
+
+			if (plugin.settings.ui.meta) {
+				// update image object when src changes
+				plugin.ui.imgSrcField.addListener('keyup', function (event) {
+					plugin.srcChange();
+				});
+
+				plugin.ui.imgSrcField.addListener('blur', function (event) {
+					// TODO remove image or do something useful if the user leaves the
+					// image without defining a valid image src
+					var img = jQuery(plugin.ui.imgSrcField.getTargetObject());
+					if (img.attr('src') === '') {
+						img.remove();
+					} // image removal when src field is blank
+				});
+			}
+
+			// Override the default method by using the given one
+			if (plugin.settings.onCropped && typeof plugin.settings.onCropped === "function") {
+				plugin.onCropped = plugin.settings.onCropped;
+			}
+
+			// Override the default method by using the given one
+			if (plugin.settings.onReset && typeof plugin.settings.onReset === "function") {
+				plugin.onReset = plugin.settings.onReset;
+			}
+
+			// Override the default method by using the given one
+			if (plugin.settings.onResized && typeof plugin.settings.onResized === "function") {
+				plugin.onResized = plugin.settings.onResized;
+			}
+
+			// Override the default method by using the given one
+			if (plugin.settings.onResize && typeof plugin.settings.onResize === "function") {
+				plugin.onResize = this.settings.onResize;
+			}
+
+		},
+
+		/**
+		 * Subscribe to Aloha events and DragAndDropPlugin Event
+		 */
+		subscribeEvents: function () {
+			var	plugin = this;
+			var config = this.settings;
+
+			jQuery('img').filter(config.globalselector).unbind();
+			jQuery('img').filter(config.globalselector).click(function (event) {
+				plugin.clickImage(event);
+			});
+
+			Aloha.bind('aloha-drop-files-in-editable', function (event, data) {
+				var img, len = data.filesObjs.length, fileObj, config;
+
+				while (--len >= 0) {
+					fileObj = data.filesObjs[len];
+					if (fileObj.file.type.match(/image\//)) {
+						config = plugin.getEditableConfig(data.editable);
+						// Prepare
+						img = jQuery('<img/>');
+						img.css({
+							"max-width": that.maxWidth,
+							"max-height": that.maxHeight
+						});
+						img.attr('id', fileObj.id);
+						if (typeof fileObj.src === 'undefined') {
+							img.attr('src', fileObj.data);
+							//fileObj.src = fileObj.data ;
+						} else {
+							img.attr('src', fileObj.src);
+						}
+						GENTICS.Utils.Dom.insertIntoDOM(img, data.range, jQuery(Aloha.activeEditable.obj));
+					}
+				}
+
+			});
+			/*
+			 * Add the event handler for selection change
+			 */
+			Aloha.bind('aloha-selection-changed', function (event, rangeObject, originalEvent) {
+				var config, foundMarkup;
+
+				if (originalEvent && originalEvent.target) {
+					// Check if the element is currently being resized
+					if (plugin.settings.ui.resizable && !jQuery(originalEvent.target).hasClass('ui-resizable-handle')) {
+						plugin.endResize();
+						plugin.imageObj = null;
+						Aloha.trigger('aloha-image-unselected');
+					}
+				}
+
+				if (Aloha.activeEditable !== null) {
+					foundMarkup = plugin.findImgMarkup(rangeObject);
+					config = plugin.getEditableConfig(Aloha.activeEditable.obj);
+
+					if (typeof config !== 'undefined') {
+						plugin.ui._insertImageButton.show();
+					} else {
+						plugin.ui._insertImageButton.hide();
+						return;
+					}
+
+					// Enable image specific ui components if the element is an image
+					if (foundMarkup) { // TODO : this is always null (below is dead code, moving it to clickImage)
+						plugin.ui._insertImageButton.show();
+						plugin.ui.setScope();
+						if (plugin.settings.ui.meta) {
+							plugin.ui.imgSrcField.setTargetObject(foundMarkup, 'src');
+							plugin.ui.imgTitleField.setTargetObject(foundMarkup, 'title');
+						}
+						plugin.ui.imgSrcField.foreground();
+						plugin.ui.imgSrcField.focus();
+					} else {
+						if (plugin.settings.ui.meta) {
+							plugin.ui.imgSrcField.setTargetObject(null);
+						}
+					}
+					// TODO this should not be necessary here!
+					plugin.ui.doLayout();
+				}
+
+			});
+
+			Aloha.bind('aloha-editable-created', function (event, editable) {
+				try {
+					// this disables mozillas image resizing facilities
+					document.execCommand('enableObjectResizing', false, false);
+				} catch (e) {
+					Aloha.Log.info(e, 'Could not disable enableObjectResizing');
+					// this is just for other browsers, which do not support disabling enableObjectResizing
+				}
+
+				// Inital click on images will be handled here
+				// editable.obj.find('img').attr('_moz_resizing', false);
+				// editable.obj.find('img').contentEditable(false);
+
+				editable.obj.delegate('img', 'mouseup', function (event) {
+					if (!resizing) {
+						plugin.clickImage(event);
+						event.stopPropagation();
+					}
+				});
+			});
+
+			plugin._subscribeToResizeFieldEvents();
+
+		},
+
+
+		/**
+		 * Automatically resize the image to fit into defined bounds.
+		 * @param doScaleUp if true, small images are scaled up to fit minimum size
+		 */
+		autoResize: function(doScaleUp) {
+			// @todo handle ratio mismatches (eg 4:3 is set but image is 16:9 --> image needs to be cut)
+
+			var that = this;
+
+			var widthField = jQuery("#" + that.ui.imgResizeWidthField.getInputId());
+			var heightField = jQuery("#" + that.ui.imgResizeHeightField.getInputId());
+
+			var width = that.imageObj.width();
+			var height = that.imageObj.height();
+			var resize = false;
+
+			// Only normalize the field values if the image exceeds the defined bounds
+			if (width < that.settings.minWidth ||
+				width > that.settings.maxWidth ||
+				height < that.settings.minHeight ||
+				height > that.settings.maxHeight) {
+				resize = true;
+			}
+
+			var aspectRatio = width / height;
+
+			if (resize) {
+				if (width > that.settings.maxWidth) {
+					width = that.settings.maxWidth;
+					height = width / aspectRatio;
+				}
+
+				if (height > that.settings.maxHeight) {
+					height = that.settings.maxHeight;
+					width = height * aspectRatio;
+				}
+
+				if ((width < that.settings.minWidth) && doScaleUp) {
+					width = that.settings.minWidth;
+					height = width / aspectRatio;
+				}
+
+				if ((height < that.settings.minHeight) && doScaleUp) {
+					height = that.settings.minHeight;
+					width = width * aspectRatio;
+				}
+
+				widthField.val(width);
+				heightField.val(height);
+
+				that.setSizeByFieldValue();
+				return true;
+			}
+			return false;
+		},
+
+		/**
+		 * Toggle the keep aspect ratio functionality
+		 */
+		toggleKeepAspectRatio: function() {
+
+			this.keepAspectRatio = !this.keepAspectRatio;
+
+			if (typeof this.jcAPI !== 'undefined' && this.jcAPI !== null) {
+				//toggling keepaspectratio during crop is deactivated until implemented
+				//this.ui._imageCnrRatioButton.setState(false);
+
+			} else {
+
+
+				this.endResize();
+				if (!this.keepAspectRatio) {
+					this.aspectRatioValue = false;
+				} else {
+					// If no fixed aspect ratio was given a new start aspect ratio is calculated
+					// that will be used for the next startResize action
+
+					if ( typeof this.settings.fixedAspectRatio !== 'number' ) {
+						this.aspectRatioValue = this.imageObj.width() / this.imageObj.height();
+					} else {
+						this.aspectRatioValue = this.settings.fixedAspectRatio;
+					}
+				}
+				this.startResize();
+			}
+		},
+
+		/**
+		 * Bind interaction events that are invoked on the resize fields
+		 */
+		_subscribeToResizeFieldEvents: function () {
+			var plugin = this;
+
+			/**
+			 * Handle the keyup event on the field
+			 */
+			function handleKeyUpEventOnField(e) {
+
+				// Load the max/min from the data properties of this event
+				var minValue = e.data.minValue;
+				var maxValue = e.data.maxValue;
+				var fieldName = e.data.fieldName;
+
+				// Allow backspace and delete
+				if (e.keyCode === 8 || e.keyCode === 46) {
+
+					// Only resize if field values are ok
+					if (plugin._updateFields(fieldName, $(this).val(), false)) {
+						// Check if we are currently in cropping mode
+						if (typeof plugin.jcAPI !== 'undefined' && plugin.jcAPI !== null) {
+							plugin.setCropAreaByFieldValue();
+						} else {
+							plugin.setSizeByFieldValue();
+						}
+					}
+				// 0-9 keys
+				} else if (e.keyCode <= 57 && e.keyCode >= 48 || e.keyCode <= 105 && e.keyCode >= 96 ) {
+
+					// Only resize if field values are ok
+					if (plugin._updateFields(fieldName, $(this).val(), false)) {
+						// Check if we are currently in cropping mode
+						if (typeof plugin.jcAPI !== 'undefined' && plugin.jcAPI !== null) {
+							plugin.setCropAreaByFieldValue();
+						} else {
+							plugin.setSizeByFieldValue();
+						}
+					}
+				} else {
+					var delta = 0;
+					if (e.keyCode === 38 || e.keyCode === 107) {
+						delta = +1;
+					} else if (e.keyCode === 40 || e.keyCode === 109) {
+						delta = -1;
+					}
+					// Handle key combinations
+					if (e.shiftKey || e.metaKey || e.ctrlKey) {
+						delta = delta * 10;
+					}
+
+					var isDecrement = false;
+					if (delta < 0) {
+						isDecrement = true;
+					}
+					var newValue = parseInt($(this).val(), 10) + delta;
+
+					// Only resize if field values are ok
+					if (plugin._updateFields(fieldName, newValue, isDecrement)) {
+						// Check if we are currently in cropping mode
+						if (typeof plugin.jcAPI !== 'undefined' && plugin.jcAPI !== null) {
+							plugin.setCropAreaByFieldValue();
+						} else {
+							plugin.setSizeByFieldValue();
+						}
+					}
+				}
+
+				e.preventDefault();
+				return false;
+			}
+
+			/**
+			 * Handle the mouse wheel event on the field
+			 */
+			function handleMouseWheelEventOnField(e, delta) {
+				var minValue = e.data.minValue;
+				var maxValue = e.data.maxValue;
+				var fieldName = e.data.fieldName;
+
+				// Handle key combinations
+				if (e.shiftKey || e.metaKey || e.ctrlKey) {
+					delta = delta * 10;
+				}
+
+				var newValue = parseInt($(this).val(), 10) + delta;
+				var decrement = false;
+				if (delta < 0) {
+					decrement = true;
+				}
+
+				// Only resize if field values are ok
+				if (plugin._updateFields(fieldName, newValue, decrement)) {
+					// Check if we are currently in cropping mode
+					if (typeof plugin.jcAPI !== 'undefined' && plugin.jcAPI !== null) {
+						plugin.setCropAreaByFieldValue();
+					} else {
+						plugin.setSizeByFieldValue();
+					}
+				}
+				return false;
+			}
+
+			/**
+			 * Handle mousewheel,keyup actions on both fields
+			 */
+			var $heightField = $('#' + plugin.ui.imgResizeHeightField.getInputId());
+			var heightEventData = {fieldName: 'height', maxValue: plugin.ui.imgResizeHeightField.maxValue, minValue: plugin.ui.imgResizeHeightField.minValue };
+			$heightField.live('keyup', heightEventData, handleKeyUpEventOnField);
+			$heightField.live('mousewheel', heightEventData, handleMouseWheelEventOnField);
+
+			var $widthField = $('#' + plugin.ui.imgResizeWidthField.getInputId());
+			var widthEventData = {fieldName: 'width', maxValue: plugin.ui.imgResizeWidthField.maxValue, minValue: plugin.ui.imgResizeWidthField.minValue};
+			$widthField.live('keyup', widthEventData, handleKeyUpEventOnField);
+			$widthField.live('mousewheel', widthEventData, handleMouseWheelEventOnField);
+
+		},
+
+		/**
+		 * Manually set the given size for the current image
+		 */
+		setSize: function (width, height) {
+
+			var plugin = this;
+			plugin.imageObj.width(width);
+			plugin.imageObj.height(height);
+			var $wrapper = plugin.imageObj.closest('.Aloha_Image_Resize');
+			$wrapper.height(height);
+			$wrapper.width(width);
+
+			plugin._onResize(plugin.imageObj);
+			plugin._onResized(plugin.imageObj);
+		},
+
+		/**
+		 * This method will handle the mouseUp event on images (eg. within editables).
+		 * It will if enabled activate the resizing action.
+		 */
+		clickImage: function (e) {
+
+			var plugin = this;
+			plugin.endResize(); // removes previous resize handler
+			plugin.imageObj = jQuery(e.target);
+			var currentImage = plugin.imageObj;
+
+			// Ignore any images that are part of the ui (e.g. block edit and delete icons)
+			if (currentImage.hasClass('aloha-ui')) {
+				return;
+			}
+
+			plugin.ui.setScope();
+
+			var editable = currentImage.closest('.aloha-editable');
+
+			this.ui._imageCnrRatioButton.setState(this.keepAspectRatio);
+
+			// Disabling the content editable. This will disable the resizeHandles in internet explorer
+			// already done in resize on a smaller scope, this block next aloha-selection-change event
+			// to be thrown
+			// editable.contentEditable(false);
+
+			//Store the current props of the image
+			this.restoreProps.push({
+				obj : e.srcElement,
+				src : plugin.imageObj.attr('src'),
+				width : plugin.imageObj.width(),
+				height : plugin.imageObj.height()
+			});
+
+			// Update the resize input fields with the new width and height
+			var heightField = $('#' + plugin.ui.imgResizeHeightField.getInputId());
+			heightField.val(plugin.imageObj.height());
+			heightField.css('background-color', '');
+
+			var widthField = $('#' + plugin.ui.imgResizeWidthField.getInputId());
+			widthField.val(plugin.imageObj.width());
+			widthField.css('background-color', '');
+
+			if (plugin.settings.ui.meta) {
+				plugin.ui.imgSrcField.setTargetObject(plugin.imageObj, 'src');
+				plugin.ui.imgTitleField.setTargetObject(plugin.imageObj, 'title');
+			}
+			Aloha.Selection.preventSelectionChanged();
+			try {
+				plugin.ui.imgSrcField.focus();
+			} catch(e) {
+				// FIXME for some reason execution breaks at this point
+			}
+
+			//to handle switching between images, aspect ratio is recalculated on click
+			plugin.aspectRatioValue = plugin.imageObj.width() / plugin.imageObj.height();
+
+			if (plugin.settings.ui.resizable) {
+				plugin.startResize();
+			}
+
+			if (plugin.settings.autoResize) {
+				plugin.autoResize(true);
+			}
+			Aloha.Selection.preventSelectionChangedFlag = false;
+			Aloha.trigger('aloha-image-selected');
+		},
+
+		/**
+		 * This method extracts determins if the range selection contains an image
+		 *
+		 * UNUSED as long as clickImage don't change the selection
+		 * @see getPluginFocus instead
+		 */
+		findImgMarkup: function (range) {
+
+			var plugin = this;
+			var config = this.config;
+			var result, targetObj;
+
+			if (typeof range === 'undefined') {
+				range = Aloha.Selection.getRangeObject();
+			}
+
+			targetObj = jQuery(range.startContainer);
+
+			try {
+				if (Aloha.activeEditable) {
+					if ((typeof range.startContainer !== 'undefined' &&
+						typeof range.startContainer.childNodes !== 'undefined' &&
+						typeof range.startOffset !== 'undefined' &&
+						typeof range.startContainer.childNodes[range.startOffset] !== 'undefined' &&
+						range.startContainer.childNodes[range.startOffset].nodeName.toLowerCase() === 'img' &&
+						range.startOffset + 1 === range.endOffset) ||
+						(targetObj.hasClass('Aloha_Image_Resize')))
+					{
+						result = targetObj.find('img')[0];
+						if (! result.css) {
+							result.css = '';
+						}
+
+						if (! result.title) {
+							result.title = '';
+						}
+
+						if (! result.src) {
+							result.src = '';
+						}
+						return result;
+					}
+					else {
+						return null;
+					}
+				}
+			} catch (e) {
+				Aloha.Log.debug(e, "Error finding img markup.");
+			}
+			return null;
+		},
+		/**
+		 * Gets the plugin focus target
+		 */
+		getPluginFocus: function () {
+			return this.imageObj;
+		},
+
+		/**
+		 * Helper function that checks a field-input (of height or width), adjusts
+		 * its value to conform to minimum/maximum values, and corrects the other field
+		 * if the aspect ratio is to be kept
+		 * @param primaryFieldName the field which is currently edited ('height' or 'width')
+		 * @param newValue the value as it was entered into the primary field
+		 * @param isDecrement true if value is being decreased (by key or mousewheel); prevents decreasing below minimum
+		 * @return true if values are correct or have been corrected, and image can be resized
+		 */
+		_updateFields: function (primaryFieldName, newValue, isDecrement) {
+			var plugin = this;
+
+			var primaryField = null;
+			var secondaryField = null;
+
+			var adjustedAspectRatio = null;
+			var primaryMin = null;
+			var primaryMax = null;
+			var secondaryMin = null;
+			var secondaryMax = null;
+
+			//depending on the field that is edited, primary and secondary values are set
+			if (primaryFieldName == 'width') {
+				primaryField = jQuery("#" + plugin.ui.imgResizeWidthField.getInputId());
+				secondaryField = jQuery("#" + plugin.ui.imgResizeHeightField.getInputId());
+				adjustedAspectRatio = ( 1 / plugin.aspectRatioValue );
+
+				primaryMin = plugin.settings.minWidth;
+				primaryMax = plugin.settings.maxWidth;
+				secondaryMin = plugin.settings.minHeight;
+				secondaryMax = plugin.settings.maxHeight;
+
+			} else if (primaryFieldName == 'height') {
+				primaryField = jQuery("#" + plugin.ui.imgResizeHeightField.getInputId());
+				secondaryField = jQuery("#" + plugin.ui.imgResizeWidthField.getInputId());
+				adjustedAspectRatio = plugin.aspectRatioValue;
+
+				primaryMin = plugin.settings.minHeight;
+				primaryMax = plugin.settings.maxHeight;
+				secondaryMin = plugin.settings.minWidth;
+				secondaryMax = plugin.settings.maxWidth;
+			} else {
+				//if primaryFieldName is neither width nor height, don't update the fields
+				return false;
+			}
+
+			if (isNaN(newValue)) {
+				primaryField.css('background-color', 'red');
+				// If the current value of the field can't be parsed it is not updated
+				return false;
+			}
+			else {
+				primaryField.val(newValue);
+			}
+
+			var correctPrimary = true;
+
+			if (newValue > primaryMax) {
+				// Auto correct out of bounds values
+				if (plugin.settings.autoCorrectManualInput) {
+					primaryField.val(primaryMax);
+					newValue = primaryField.val();
+					primaryField.css('background-color', '');
+					correctPrimary = true;
+				// Just notify the user, do nothing
+				} else {
+					primaryField.css('background-color', 'red');
+					correctPrimary = false;
+				}
+			} else if (newValue < primaryMin) {
+				// Don't let the user decrement values below minimum
+				if (isDecrement) {
+					primaryField.val(primaryMin);
+					newValue = primaryField.val();
+					correctPrimary = true;
+				// Auto correct out of bounds values
+				} else if (plugin.settings.autoCorrectManualInput) {
+					primaryField.css('background-color', 'wheat');
+					correctPrimary = false;
+				// Just notify the user, do nothing
+				} else {
+					primaryField.css('background-color', 'red');
+					correctPrimary = false;
+				}
+			} else {
+				primaryField.css('background-color', '');
+				correctPrimary = true;
+			}
+
+			var correctSecondary = true;
+
+			// if keep aspect ratio is enabled, the field that is not edited is updated as well
+			if ( plugin.keepAspectRatio ) {
+				var secondary = Math.round(newValue * adjustedAspectRatio);
+
+				if (secondary > secondaryMax) {
+					// Auto correct out of bounds values
+					if (plugin.settings.autoCorrectManualInput) {
+						secondaryField.val(secondaryMax);
+						primaryField.val(secondaryField.val() / adjustedAspectRatio);
+						newValue = primaryField.val();
+						primaryField.css('background-color', '');
+						secondaryField.css('background-color', '');
+						correctSecondary = true;
+					// Just notify the user, do nothing
+					} else {
+						secondary.css('background-color', 'red');
+						correctSecondary = false;
+					}
+				} else if (secondary < secondaryMin) {
+					// Don't let the user decrement values below minimum
+					if (isDecrement) {
+						secondaryField.val(secondaryMin);
+						primaryField.val(secondaryField.val() / adjustedAspectRatio);
+						newValue = primaryField.val();
+						correctPrimary = true;
+					// Auto correct out of bounds values
+					} else if (plugin.settings.autoCorrectManualInput) {
+						secondaryField.val(secondary);
+						secondaryField.css('background-color', 'wheat');
+						correctSecondary = false;
+					// Just notify the user, do nothing
+					} else {
+						secondaryField.css('background-color', 'red');
+						correctSecondary = false;
+					}
+				} else {
+					secondaryField.val(secondary);
+					secondaryField.css('background-color', '');
+					correctSecondary = true;
+				}
+			}
+
+			//Success if values are correct or have been adjusted accordingly
+			if (correctPrimary && correctSecondary) {
+				return true;
+			}
+			return false;
+		},
+
+		/**
+		 * Helper function that will set the new image size using the field values
+		 */
+		setSizeByFieldValue: function () {
+			var plugin = this;
+			var width =  $('#' + plugin.ui.imgResizeWidthField.getInputId()).val();
+			var height = $('#' + plugin.ui.imgResizeHeightField.getInputId()).val();
+			plugin.setSize(width, height);
+		},
+
+		/**
+		 * Helper function that will set the new crop area width and height using the field values
+		 */
+		setCropAreaByFieldValue: function () {
+			var plugin = this;
+			var currentCropArea = plugin.jcAPI.tellSelect();
+
+			var width =  $('#' + plugin.ui.imgResizeWidthField.getInputId()).val();
+			width = parseInt(width, 10);
+			var height = $('#' + plugin.ui.imgResizeHeightField.getInputId()).val();
+			height = parseInt(height, 10);
+
+			var selection = [currentCropArea['x'], currentCropArea['y'], currentCropArea['x'] + width,currentCropArea['y'] + height];
+			plugin.jcAPI.setSelect(selection);
+		},
+
+		/**
+		* This method will insert a new image dom element into the dom tree
+		*/
+		insertImg: function () {
+				var range = Aloha.Selection.getRangeObject(),
+				config = this.getEditableConfig(Aloha.activeEditable.obj),
+				imagePluginUrl = Aloha.getPluginUrl('image'),
+				imagestyle, imagetag, newImg;
+
+				if (range.isCollapsed()) {
+					// TODO I would suggest to call the srcChange method. So all image src
+					// changes are on one single point.
+					imagestyle = "max-width: " + config.maxWidth + "; max-height: " + config.maxHeight;
+					imagetag = '<img style="' + imagestyle + '" src="' + imagePluginUrl + '/img/blank.jpg" title="" />';
+					newImg = jQuery(imagetag);
+					// add the click selection handler
+					//newImg.click( Aloha.Image.clickImage ); - Using delegate now
+					GENTICS.Utils.Dom.insertIntoDOM(newImg, range, jQuery(Aloha.activeEditable.obj));
+
+			} else {
+				Aloha.Log.error('img cannot markup a selection');
+				// TODO the desired behavior could be me the selected content is
+				// replaced by an image.
+				// TODO it should be editor's choice, with an NON-Ext Dialog instead of alert
+
+			}
+		},
+
+		srcChange: function () {
+			// TODO the src changed. I suggest :
+			// 1. set an loading image (I suggest set src base64 enc) to show the user
+			// we are trying to load an image
+			// 2. start a request to get the image
+			// 3a. the image is ok change the src
+			// 3b. the image is not availbable show an error.
+			 this.imageObj.attr('src', this.ui.imgSrcField.getValue()); // (the img tag)
+//			 jQuery(img).attr('src', this.imgSrcField.getQueryValue()); // (the query value in the inputfield)
+//			 this.imgSrcField.getItem(); // (optinal a selected resource item)
+			// TODO additionally implement an srcChange Handler to let implementer
+			// customize
+		},
+
+		/**
+		 * Reposition the crop buttons below the crop area
+		 */
+		positionCropButtons: function() {
+
+			var jt = jQuery('.jcrop-tracker:first'),
+				off = jt.offset(),
+				jtt = off.top,
+				jtl = off.left,
+				jth = jt.height(),
+				jtw = jt.width();
+
+			var oldLeft = 0,
+				oldTop = 0;
+
+			var btns = jQuery('#aloha-CropNResize-btns');
+
+			// Hack to hide the buttons when the user just clicked into the image
+			if (jtt === 0 && jtl === 0) {
+				btns.hide();
+			}
+
+			// move the icons to the bottom right side
+			jtt = parseInt(jtt + jth + 3, 10);
+			jtl = parseInt(jtl + (jtw / 2) - (btns.width() / 2) + 10, 10);
+
+			// comparison to old values hinders flickering bug in FF
+			if (oldLeft != jtl || oldTop != jtt) {
+				btns.offset({top: jtt, left: jtl});
+			}
+
+			oldLeft = jtl;
+			oldTop = jtt;
+		},
+
+		/**
+		 * Code imported from CropnResize Plugin
+		 *
+		 */
+		initCropButtons: function() {
+			var that = this,
+				btns;
+
+			jQuery('body').append(
+				'<div id="aloha-CropNResize-btns" display="none">' +
+					'<button class="cnr-crop-apply" title="' + i18n.t('Accept') + '"></button>' +
+					'<button class="cnr-crop-cancel" title="' + i18n.t('Cancel') + '"></button>' +
+				'</div>'
+			);
+
+			btns = jQuery('#aloha-CropNResize-btns');
+
+			btns.find('.cnr-crop-apply').click(function () {
+				that.acceptCrop();
+			});
+
+			btns.find('.cnr-crop-cancel').click(function () {
+				that.endCrop();
+			});
+
+			this.interval = setInterval(function () {
+				that.positionCropButtons();
+			}, 10);
+		},
+
+		/**
+		 * Destroy crop confirm and cancel buttons
+		 */
+		destroyCropButtons: function () {
+			jQuery('#aloha-CropNResize-btns').remove();
+			clearInterval(this.interval);
+		},
+
+		/**
+		 * Helper function that will disable selectability of elements
+		 */
+		_disableSelection: function (el) {
+			el.find('*').attr('unselectable', 'on')
+					.css({
+					'-moz-user-select':'none',
+					'-webkit-user-select':'none',
+					'user-select':'none'
+					});
+				/*
+					.each(function() {
+					this.onselectstart = function () { return false; };
+					});
+					*/
+
+		},
+
+		/**
+		 * Initiate a crop action
+		 */
+		crop: function () {
+			var plugin = this;
+			var config = this.config;
+
+			plugin.initCropButtons();
+			if (plugin.settings.ui.resizable) {
+				plugin.endResize();
+			}
+
+			plugin.jcAPI = jQuery.Jcrop(plugin.imageObj, {
+				onSelect : function () {
+					plugin._onCropSelect();
+					// ugly hack to keep scope :(
+					window.setTimeout(function () {
+						plugin.ui.setScope();
+					}, 10);
+				}
+			});
+
+			plugin._disableSelection($('.jcrop-holder'));
+			plugin._disableSelection($('#imageContainer'));
+			plugin._disableSelection($('#aloha-CropNResize-btns'));
+			$('body').trigger('aloha-image-crop-start', [plugin.imageObj]);
+		},
+
+		/**
+		 * Internal on crop select method
+		 */
+		_onCropSelect: function () {
+			var plugin = this;
+
+			jQuery('#aloha-CropNResize-btns').fadeIn('slow');
+
+			// Hide the crop buttons when the one of the handles is clicked
+			jQuery('.jcrop-handle').mousedown(function () {
+				jQuery('#aloha-CropNResize-btns').hide();
+			});
+
+			jQuery('.jcrop-tracker').mousedown(function () {
+				jQuery('#aloha-CropNResize-btns').hide();
+			});
+
+			// Update the width and height field using the initial active crop area values
+			if (typeof plugin.jcAPI !== 'undefined' && plugin.jcAPI !== null) {
+
+				plugin.positionCropButtons();
+				var currentCropArea = plugin.jcAPI.tellSelect();
+
+				var widthField = jQuery("#" + plugin.ui.imgResizeWidthField.getInputId()).val(currentCropArea['w']);
+				var heightField = jQuery("#" + plugin.ui.imgResizeHeightField.getInputId()).val(currentCropArea['h']);
+
+			}
+
+		},
+
+
+		/**
+		 * Terminates a crop
+		 */
+		endCrop: function () {
+			if (this.jcAPI) {
+				this.jcAPI.destroy();
+				this.jcAPI = null;
+			}
+
+			this.destroyCropButtons();
+			this.ui._imageCropButton.setState(false);
+
+			if (this.settings.ui.resizable) {
+				this.startResize();
+			}
+
+			$('body').trigger('aloha-image-crop-stop', [this.imageObj]);
+
+			//after cropping, field values are set to (once again) contain image width/height
+			$('#' + this.ui.imgResizeHeightField.getInputId()).val(this.imageObj.height());
+			$('#' + this.ui.imgResizeWidthField.getInputId()).val(this.imageObj.width());
+
+		},
+
+		/**
+		 * Accept the current cropping area and apply the crop
+		 */
+		acceptCrop: function () {
+			this._onCropped(this.imageObj, this.jcAPI.tellSelect());
+			this.endCrop();
+		},
+
+		/**
+		 * This method will activate the jquery-ui resize functionality for the current image
+		 */
+		startResize: function () {
+			var plugin = this;
+			var currentImageObj = this.imageObj;
+			var ratio = plugin.keepAspectRatio ? plugin.aspectRatioValue : false;
+
+			currentImageObj = this.imageObj.css({
+				height		: this.imageObj.height(),
+				width		: this.imageObj.width(),
+				position	: 'relative',
+				'max-height': '',
+				'max-width'	: ''
+			});
+
+			currentImageObj.resizable({
+				maxHeight : plugin.settings.maxHeight,
+				minHeight : plugin.settings.minHeight,
+				maxWidth  : plugin.settings.maxWidth,
+				minWidth  : plugin.settings.minWidth,
+				aspectRatio : ratio,
+				handles: plugin.settings.handles,
+				grid : plugin.settings.grid,
+				resize: function (event, ui) {
+					resizing = true;
+					plugin._onResize(plugin.imageObj);
+				},
+				stop : function (event, ui) {
+					resizing = false;
+
+					plugin._onResized(plugin.imageObj);
+
+					// Workaround to finish cropping
+					if (this.enableCrop) {
+						window.setTimeout(function () {
+							plugin.ui.setScope();
+							that.done(event);
+						}, 10);
+					}
+				}
+
+			});
+
+			currentImageObj.css('display', 'inline-block');
+
+			// this will prevent the user from resizing an image
+			// using IE's resize handles
+			// however I could not manage to hide them completely
+			jQuery('.ui-wrapper')
+				.attr('contentEditable', false)
+				.addClass('aloha-image-box-active Aloha_Image_Resize aloha')
+				.css({
+					position: 'relative',
+					display: 'inline-block',
+					'float': plugin.imageObj.css('float')
+				})
+				.bind('resizestart', function (e) {
+					e.preventDefault();
+				})
+				.bind('mouseup', function (e) {
+					e.originalEvent.stopSelectionUpdate = true;
+				});
+		},
+
+		/**
+		 * This method will end resizing and toggle buttons accordingly and remove all markup that has been added for cropping
+		 */
+		endResize: function () {
+			// Find the nearest contenteditable and reenable it since resizing is finished
+			if (this.imageObj) {
+				var editable = this.imageObj.closest('.aloha-editable');
+				//this.imageObj.contentEditable(true);
+			}
+
+			if (this.imageObj && this.imageObj.is(":ui-resizable")) {
+				this.imageObj
+					.resizable('destroy')
+					.css({
+						top	 : 0,
+						left : 0
+					});
+			}
+		},
+
+		resetSize: function () {
+			var	plugin = this,
+				img = new Image();
+			img.onload = function () {
+				var myimage = plugin.getPluginFocus();
+				if (plugin.settings.ui.resizable) {
+					plugin.endResize();
+				}
+				jQuery(myimage).add(myimage.parent()).css({
+						'width': img.width + 'px',
+						'height': img.height + 'px',
+						'max-width': '',
+						'max-height': ''
+					});
+				if (plugin.settings.ui.resizable) {
+					plugin.resize();
+				}
+			};
+			img.src = plugin.getPluginFocus().attr('src');
+		},
+		/**
+		 * Reset the image to its original properties
+		 */
+		reset: function () {
+			if (this.settings.ui.crop) {
+				this.endCrop();
+			}
+
+			if (this.settings.ui.resizable) {
+				this.endResize();
+			}
+
+			if (this._onReset(this.imageObj)) {
+				// the external reset procedure has already performed a reset, so there is no need to apply an internal reset
+				return;
+			}
+
+			for (var i = 0;i < this.restoreProps.length;i++) {
+				// restore from restoreProps if there is a match
+				if (this.imageObj.get(0) === this.restoreProps[i].obj) {
+					this.imageObj.attr('src', this.restoreProps[i].src);
+					this.imageObj.width(this.restoreProps[i].width);
+					this.imageObj.height(this.restoreProps[i].height);
+					return;
+				}
+			}
+		}
+	});
+
+});
