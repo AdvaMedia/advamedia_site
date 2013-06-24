@@ -29,7 +29,7 @@ end
 # сжатых файлов статики при деплое.
 # Если вы не используете assets pipelining в своем проекте,
 # или у вас старая версия rails, закомментируйте эту строку.
-load 'deploy/assets'
+#load 'deploy/assets'
 
 # Для удобства работы мы рекомендуем вам настроить авторизацию
 # SSH по ключу. При работе capistrano будет использоваться
@@ -85,10 +85,10 @@ set :repository,    "git://github.com/AdvaMedia/advamedia_site.git"
 
 before 'deploy:finalize_update', 'set_current_release'
 task :set_current_release, :roles => :app do
-    set :current_release, latest_release
+  set :current_release, latest_release
 end
 
-  set :unicorn_start_cmd, "(cd #{deploy_to}/current; rvm use #{rvm_ruby_string} do bundle exec unicorn_rails -Dc #{unicorn_conf})"
+set :unicorn_start_cmd, "(cd #{deploy_to}/current; rvm use #{rvm_ruby_string} do bundle exec unicorn_rails -Dc #{unicorn_conf})"
 
 
 # - for unicorn - #
