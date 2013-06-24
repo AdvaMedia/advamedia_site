@@ -16,11 +16,11 @@ require 'bundler/capistrano'
 ## dayabase.yml в shared-каталог проекта на сервере и раскомментируйте
 ## следующие строки.
 
- after "deploy:update_code", :copy_database_config
- task :copy_database_config, roles => :app do
-   db_config = "#{shared_path}/mongoid.yml"
-   run "cp #{db_config} #{release_path}/config/mongoid.yml"
- end
+after "deploy:update_code", :copy_database_config
+task :copy_database_config, roles => :app do
+  db_config = "#{shared_path}/mongoid.yml"
+  run "cp #{db_config} #{release_path}/config/mongoid.yml"
+end
 
 # В rails 3 по умолчанию включена функция assets pipelining,
 # которая позволяет значительно уменьшить размер статических
@@ -42,6 +42,8 @@ ssh_options[:forward_agent] = true
 # Имя вашего проекта в панели управления.
 # Не меняйте это значение без необходимости, оно используется дальше.
 set :application,     "advamedia"
+set :keep_releases, 5
+after "deploy:update", "deploy:cleanup"
 
 # Сервер размещения проекта.
 set :deploy_server,   "lithium.locum.ru"
@@ -74,7 +76,7 @@ set :scm,             :git
 # домашнем каталоге в подкаталоге git/<имя проекта>.git.
 # Подробнее о создании репозитория читайте в нашем блоге
 # http://locum.ru/blog/hosting/git-on-locum
-set :repository,      "ssh://#{user}@#{deploy_server}/home/#{user}/git/#{application}.git"
+set :repository,    "git://github.com/AdvaMedia/advamedia_site.git"
 
 ## Если ваш репозиторий в GitHub, используйте такую конфигурацию
 # set :repository,    "git@github.com:username/project.git"
