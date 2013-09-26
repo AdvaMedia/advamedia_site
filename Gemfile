@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'rails', '3.2.13'
+gem 'rails', '3.2.14'
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
@@ -20,9 +20,8 @@ group :assets do
   gem 'uglifier', '>= 1.0.3'
 end
 
-gem 'locomotive_cms', :git => "git://github.com/locomotivecms/engine.git", :require => "locomotive/engine"
 gem 'devise', '~> 2.2.3'
-#gem 'locomotive_cms', '~> 2.0.3', :require => 'locomotive/engine'
+gem 'locomotive_cms', '~> 2.2.3', :require => 'locomotive/engine'
 gem 'unicorn', :group => 'development'
 
 # To use ActiveModel has_secure_password
